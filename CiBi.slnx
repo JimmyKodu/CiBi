@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="CiBi.Browser/CiBi.Browser.csproj" />
+  <Project Path="CiBi/CiBi.csproj" />
+</Solution>

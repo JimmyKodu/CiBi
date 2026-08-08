@@ -1,0 +1,198 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:CiBi.ViewModels"
+             xmlns:conv="clr-namespace:CiBi.Converters"
+             x:Class="CiBi.Views.MainView"
+             x:DataType="vm:MainViewModel"
+             FontFamily="avares://CiBi/Assets/Fonts/NotoSansSC.ttf#Noto Sans SC">
+
+  <UserControl.Resources>
+    <conv:BoolToBrushConverter x:Key="B2B"/>
+    <conv:BoolToThicknessConverter x:Key="B2T"/>
+  </UserControl.Resources>
+
+  <UserControl.Styles>
+    <Style Selector="TextBlock.h1">
+      <Setter Property="FontSize" Value="40"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+    <Style Selector="TextBlock.sectionTitle">
+      <Setter Property="FontSize" Value="22"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="Foreground" Value="#111827"/>
+    </Style>
+    <Style Selector="TextBlock.sectionSub">
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="Foreground" Value="#6B7280"/>
+    </Style>
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="White"/>
+      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="Padding" Value="16,14"/>
+    </Style>
+    <Style Selector="TextBlock.metricLabel">
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Foreground" Value="#9CA3AF"/>
+    </Style>
+    <Style Selector="TextBlock.metricValue">
+      <Setter Property="FontSize" Value="15"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Foreground" Value="#111827"/>
+    </Style>
+  </UserControl.Styles>
+
+  <ScrollViewer Background="#F4F6F8" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel>
+
+      <!-- HERO -->
+      <Border Background="#1428A0">
+        <Grid ColumnDefinitions="*,Auto" Margin="48,34,48,30">
+          <StackPanel Grid.Column="0" Spacing="6">
+            <TextBlock Text="GLM Coding Plan" Classes="h1" Foreground="White"/>
+            <TextBlock Text="AI 编程套餐性价比对比" FontSize="18" Foreground="#C7D2FE"/>
+            <TextBlock Text="按每百万 Token 月费排序，数值越低越划算" FontSize="13" Foreground="#A5B4FC" Margin="0,2,0,0"/>
+          </StackPanel>
+
+          <Border Grid.Column="1" Background="#1E40C0" CornerRadius="12" Padding="20,16" VerticalAlignment="Center" MinWidth="300">
+            <StackPanel Spacing="12">
+              <TextBlock Text="汇率与显示币种" Foreground="#E0E7FF" FontSize="13"/>
+              <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                <TextBlock Text="1 USD =" Foreground="White" VerticalAlignment="Center"/>
+                <TextBox Text="{Binding ExchangeRateText}" Width="84" HorizontalContentAlignment="Center"/>
+                <TextBlock Text="CNY" Foreground="White" VerticalAlignment="Center"/>
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                <RadioButton Content="¥ 人民币" GroupName="cur" IsChecked="{Binding IsCny}" Foreground="White"/>
+                <RadioButton Content="$ 美元" GroupName="cur" IsChecked="{Binding IsUsd}" Foreground="White"/>
+              </StackPanel>
+              <TextBlock Text="{Binding ExchangeHint}" FontSize="11" Foreground="#A5B4FC" HorizontalAlignment="Center"/>
+            </StackPanel>
+          </Border>
+        </Grid>
+      </Border>
+
+      <!-- RANKING -->
+      <StackPanel Margin="48,28,48,8" Spacing="4">
+        <TextBlock Text="性价比排行" Classes="sectionTitle"/>
+        <TextBlock Text="按每百万 Token 月费从低到高" Classes="sectionSub" Margin="0,2,0,10"/>
+        <ItemsControl ItemsSource="{Binding Ranked}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="vm:PlanView">
+              <Border Classes="card" Margin="0,0,0,10"
+                      BorderBrush="{Binding IsBestValue, Converter={StaticResource B2B}, ConverterParameter=#1428A0|#E5E7EB}"
+                      BorderThickness="{Binding IsBestValue, Converter={StaticResource B2T}, ConverterParameter=2|1}">
+                <Grid ColumnDefinitions="6,40,*,Auto,200">
+                  <Border Grid.Column="0" Background="{Binding IsBestValue, Converter={StaticResource B2B}, ConverterParameter=#1428A0|#E5E7EB}" CornerRadius="6,0,0,6"/>
+                  <Border Grid.Column="1" Background="{Binding IsBestValue, Converter={StaticResource B2B}, ConverterParameter=#1428A0|#F3F4F6}"
+                          CornerRadius="16" Width="32" Height="32" Margin="6,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding RankText}" FontWeight="Bold" FontSize="13"
+                               Foreground="{Binding IsBestValue, Converter={StaticResource B2B}, ConverterParameter=#FFFFFF|#6B7280}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                  </Border>
+                  <StackPanel Grid.Column="2" Margin="14,0,0,0" VerticalAlignment="Center" Spacing="3">
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                      <Border Background="{Binding TierBrush}" CornerRadius="4" Padding="7,2">
+                        <TextBlock Text="{Binding Tier}" Foreground="White" FontSize="11" FontWeight="SemiBold"/>
+                      </Border>
+                      <TextBlock Text="{Binding FullName}" FontWeight="SemiBold" FontSize="15" Foreground="#111827"/>
+                    </StackPanel>
+                    <TextBlock Text="{Binding Subtitle}" FontSize="12" Foreground="#6B7280"/>
+                  </StackPanel>
+                  <StackPanel Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,18,0">
+                    <TextBlock Text="{Binding PerMillionDisplay}" FontSize="19" FontWeight="Bold" Foreground="#1428A0" HorizontalAlignment="Right"/>
+                    <TextBlock Text="每 1M Token / 月" FontSize="11" Foreground="#9CA3AF" HorizontalAlignment="Right"/>
+                  </StackPanel>
+                  <StackPanel Grid.Column="4" VerticalAlignment="Center" Margin="0,0,4,0">
+                    <ProgressBar Value="{Binding ValueScore}" Maximum="1" Height="9" CornerRadius="4" MinWidth="170"
+                                 Foreground="{Binding IsBestValue, Converter={StaticResource B2B}, ConverterParameter=#1428A0|#9CA3AF}"/>
+                    <TextBlock Text="{Binding ValueLabel}" FontSize="11" Foreground="#9CA3AF" Margin="0,5,0,0"/>
+                  </StackPanel>
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+
+      <!-- DETAIL CARDS -->
+      <StackPanel Margin="48,18,48,8" Spacing="4">
+        <TextBlock Text="详细参数对比" Classes="sectionTitle"/>
+        <TextBlock Text="左右滑动查看全部套餐" Classes="sectionSub" Margin="0,2,0,10"/>
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+          <ItemsControl ItemsSource="{Binding Plans}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal" Spacing="16"/>
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:PlanView">
+                <Border Width="232" CornerRadius="14" ClipToBounds="True"
+                        BorderBrush="{Binding IsBestValue, Converter={StaticResource B2B}, ConverterParameter=#1428A0|#E5E7EB}"
+                        BorderThickness="{Binding IsBestValue, Converter={StaticResource B2T}, ConverterParameter=2|1}">
+                  <StackPanel>
+                    <Border Background="{Binding IsBestValue, Converter={StaticResource B2B}, ConverterParameter=#1428A0|#F9FAFB}" Padding="16,14">
+                      <StackPanel Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                          <Border Background="{Binding TierBrush}" CornerRadius="4" Padding="7,2">
+                            <TextBlock Text="{Binding Tier}" Foreground="White" FontSize="11" FontWeight="SemiBold"/>
+                          </Border>
+                          <TextBlock Text="{Binding Version}" FontSize="12" Foreground="#6B7280" VerticalAlignment="Center"/>
+                          <TextBlock Text="·" Foreground="#D1D5DB" VerticalAlignment="Center"/>
+                          <TextBlock Text="{Binding Region}" FontSize="12" Foreground="#6B7280" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <TextBlock Text="{Binding Tier}" FontSize="24" FontWeight="Bold"
+                                   Foreground="{Binding IsBestValue, Converter={StaticResource B2B}, ConverterParameter=#FFFFFF|#111827}"/>
+                      </StackPanel>
+                    </Border>
+
+                    <Border Background="White" Padding="16,14">
+                      <StackPanel Spacing="13">
+                        <Grid ColumnDefinitions="*,Auto">
+                          <TextBlock Grid.Column="0" Classes="metricLabel" Text="月费（折算）" VerticalAlignment="Center"/>
+                          <TextBlock Grid.Column="1" Classes="metricValue" Text="{Binding PriceDisplay}"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto">
+                          <TextBlock Grid.Column="0" Classes="metricLabel" Text="原价" VerticalAlignment="Center"/>
+                          <TextBlock Grid.Column="1" Classes="metricValue" Text="{Binding OriginalPriceText}"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto">
+                          <TextBlock Grid.Column="0" Classes="metricLabel" Text="周配额" VerticalAlignment="Center"/>
+                          <TextBlock Grid.Column="1" Classes="metricValue" Text="{Binding WeeklyTokensText}"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto">
+                          <TextBlock Grid.Column="0" Classes="metricLabel" Text="月配额（估）" VerticalAlignment="Center"/>
+                          <TextBlock Grid.Column="1" Classes="metricValue" Text="{Binding MonthlyTokensText}"/>
+                        </Grid>
+                        <Border Background="#F3F4F6" Height="1" Margin="0,1"/>
+                        <Grid ColumnDefinitions="*,Auto">
+                          <TextBlock Grid.Column="0" Classes="metricLabel" Text="每 1M Token" VerticalAlignment="Center"/>
+                          <TextBlock Grid.Column="1" Text="{Binding PerMillionDisplay}" FontSize="16" FontWeight="Bold" Foreground="#1428A0"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto">
+                          <TextBlock Grid.Column="0" Classes="metricLabel" Text="性价比排名" VerticalAlignment="Center"/>
+                          <TextBlock Grid.Column="1" Text="{Binding RankText}" Classes="metricValue"/>
+                        </Grid>
+                      </StackPanel>
+                    </Border>
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </StackPanel>
+
+      <!-- FOOTER -->
+      <Border Margin="48,14,48,36" Padding="18,14" Background="#FFFFFF" CornerRadius="10" BorderBrush="#E5E7EB" BorderThickness="1">
+        <StackPanel Spacing="4">
+          <TextBlock Text="计算说明" FontWeight="SemiBold" FontSize="13" Foreground="#111827"/>
+          <TextBlock FontSize="12" Foreground="#6B7280" TextWrapping="Wrap"
+                     Text="· 月配额 = 周配额 × (52 周 ÷ 12 月)；· 每 1M Token 月费 = 月费 ÷ 月配额(M token)；· 性价比排行按每 1M Token 月费从低到高，越低越划算；· 跨币种按上方汇率折算（默认 1 USD = 6.75 CNY）；· 1 亿 token = 100 M token。数据仅供参考，以官方为准。"/>
+        </StackPanel>
+      </Border>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>
+

@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+  <PropertyGroup>
+    <TargetFramework>net10.0-browser</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Declare up front so the .NET 10 wasm workload links SkiaSharp/HarfBuzzSharp native libs (Avalonia.Browser.targets sets it too late for the workload's native-link check). -->
+    <WasmBuildNative>true</WasmBuildNative>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Browser" Version="$(AvaloniaVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CiBi\CiBi.csproj" />
+  </ItemGroup>
+</Project>
