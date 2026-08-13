@@ -15,18 +15,31 @@ public sealed class PlanView : ReactiveObject
     public string Version => Plan.Version;
     public string Region => Plan.Region;
     public string Currency => Plan.Currency;
+    public PlanType Type => Plan.Type;
+    public bool IsPayAsYouGo => Plan.Type == PlanType.PayAsYouGo;
+    public bool IsSubscription => Plan.Type == PlanType.Subscription;
     public int TokenMultiplier => Plan.TokenMultiplier;
     public decimal WeeklyTokensMillions => Plan.WeeklyTokensMillions;
     public decimal MonthlyTokensMillions => Plan.MonthlyTokensMillions;
     public decimal OriginalPrice => Plan.PriceMonthly;
-    public string OriginalPriceText => $"{CurrencySymbol(Plan.Currency)}{Plan.PriceMonthly:0.##}";
-    public string WeeklyTokensText => $"{Plan.WeeklyTokensMillions:#,##0.0} M";
-    public string MonthlyTokensText => $"{Plan.MonthlyTokensMillions:#,##0.0} M";
-    public string Subtitle => $"{Plan.Version} · {Plan.Region} · {WeeklyTokensText}/周 ×{TokenMultiplier}";
+
+    // 按量付费单价（原始币种）
+    public decimal CacheHitPrice => Plan.CacheHitPrice;
+    public decimal CacheMissPrice => Plan.CacheMissPrice;
+    public decimal OutputPrice => Plan.OutputPrice;
+
+    public string OriginalPriceText => IsPayAsYouGo ? "—" : $"{CurrencySymbol(Plan.Currency)}{Plan.PriceMonthly:0.##}";
+    public string WeeklyTokensText => IsPayAsYouGo ? "不限" : $"{Plan.WeeklyTokensMillions:#,##0.0} M";
+    public string MonthlyTokensText => IsPayAsYouGo ? "不限" : $"{Plan.MonthlyTokensMillions:#,##0.0} M";
+    public string Subtitle => IsPayAsYouGo
+        ? $"{Plan.Version} · 按量付费 · 缓存命中/未命中/输出 单价"
+        : $"{Plan.Version} · {Plan.Region} · {WeeklyTokensText}/周 ×{TokenMultiplier}";
+
     public IBrush TierBrush => new SolidColorBrush(Color.Parse(Tier switch
     {
         "Lite" => "#6B7280",
         "Pro" => "#0EA5E9",
+        "Flash" => "#10B981",
         _ => "#1428A0",
     }));
 
@@ -38,6 +51,14 @@ public sealed class PlanView : ReactiveObject
 
     private decimal _perMillionValue;
     public decimal PerMillionValue { get => _perMillionValue; set => this.RaiseAndSetIfChanged(ref _perMillionValue, value); }
+
+    // 按量付费：折算到显示币种后的三档单价文本
+    private string _cacheHitDisplay = "";
+    public string CacheHitDisplay { get => _cacheHitDisplay; set => this.RaiseAndSetIfChanged(ref _cacheHitDisplay, value); }
+    private string _cacheMissDisplay = "";
+    public string CacheMissDisplay { get => _cacheMissDisplay; set => this.RaiseAndSetIfChanged(ref _cacheMissDisplay, value); }
+    private string _outputPriceDisplay = "";
+    public string OutputPriceDisplay { get => _outputPriceDisplay; set => this.RaiseAndSetIfChanged(ref _outputPriceDisplay, value); }
 
     private int _rank;
     public int Rank { get => _rank; set => this.RaiseAndSetIfChanged(ref _rank, value); }

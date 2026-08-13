@@ -50,7 +50,7 @@
           <StackPanel Grid.Column="0" Spacing="6">
             <TextBlock Text="GLM Coding Plan" Classes="h1" Foreground="White"/>
             <TextBlock Text="AI 编程套餐性价比对比" FontSize="18" Foreground="#C7D2FE"/>
-            <TextBlock Text="按每百万 Token 月费排序，数值越低越划算" FontSize="13" Foreground="#A5B4FC" Margin="0,2,0,0"/>
+            <TextBlock Text="按每百万 Token 综合价格排序，数值越低越划算" FontSize="13" Foreground="#A5B4FC" Margin="0,2,0,0"/>
           </StackPanel>
 
           <Border Grid.Column="1" Background="#1E40C0" CornerRadius="12" Padding="20,16" VerticalAlignment="Center" MinWidth="300">
@@ -71,10 +71,57 @@
         </Grid>
       </Border>
 
+      <!-- USAGE MIX CONTROL -->
+      <Border Margin="48,24,48,0" Padding="20,18" Background="#FFFFFF" CornerRadius="12" BorderBrush="#E5E7EB" BorderThickness="1">
+        <Grid ColumnDefinitions="*,360">
+          <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock Text="按量付费用量构成" FontSize="15" FontWeight="Bold" Foreground="#111827"/>
+              <Border Background="#10B981" CornerRadius="4" Padding="6,1" VerticalAlignment="Center">
+                <TextBlock Text="DeepSeek V4" Foreground="White" FontSize="10" FontWeight="SemiBold"/>
+              </Border>
+            </StackPanel>
+            <TextBlock Text="拖动滑块调节 token 用量比例，排行动态更新" FontSize="12" Foreground="#6B7280"/>
+            <TextBlock Text="{Binding MixSummary}" FontSize="12" Foreground="#1428A0" FontWeight="SemiBold" Margin="0,4,0,0" TextWrapping="Wrap"/>
+          </StackPanel>
+
+          <StackPanel Grid.Column="1" Spacing="12" VerticalAlignment="Center">
+            <Grid ColumnDefinitions="90,*,48">
+              <TextBlock Grid.Column="0" Text="缓存命中" FontSize="12" Foreground="#374151" VerticalAlignment="Center"/>
+              <Slider Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding CacheHitRatio}" MinWidth="200" VerticalAlignment="Center"/>
+              <TextBlock Grid.Column="2" Text="{Binding CacheHitRatioText}" FontSize="12" FontWeight="SemiBold" Foreground="#1428A0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+            </Grid>
+            <Grid ColumnDefinitions="90,*,48">
+              <TextBlock Grid.Column="0" Text="输出占比" FontSize="12" Foreground="#374151" VerticalAlignment="Center"/>
+              <Slider Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding OutputRatio}" MinWidth="200" VerticalAlignment="Center"/>
+              <TextBlock Grid.Column="2" Text="{Binding OutputRatioText}" FontSize="12" FontWeight="SemiBold" Foreground="#1428A0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+            </Grid>
+            <!-- 三段比例图例 -->
+            <StackPanel Orientation="Horizontal" Spacing="14" Margin="90,2,0,0">
+              <StackPanel Orientation="Horizontal" Spacing="4">
+                <Border Background="#10B981" Width="10" Height="10" CornerRadius="2" VerticalAlignment="Center"/>
+                <TextBlock Text="缓存命中" FontSize="11" Foreground="#6B7280" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding CacheHitRatioText}" FontSize="11" Foreground="#10B981" FontWeight="SemiBold" VerticalAlignment="Center"/>
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="4">
+                <Border Background="#9CA3AF" Width="10" Height="10" CornerRadius="2" VerticalAlignment="Center"/>
+                <TextBlock Text="未命中" FontSize="11" Foreground="#6B7280" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding CacheMissRatioText}" FontSize="11" Foreground="#6B7280" FontWeight="SemiBold" VerticalAlignment="Center"/>
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="4">
+                <Border Background="#1428A0" Width="10" Height="10" CornerRadius="2" VerticalAlignment="Center"/>
+                <TextBlock Text="输出" FontSize="11" Foreground="#6B7280" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding OutputRatioText}" FontSize="11" Foreground="#1428A0" FontWeight="SemiBold" VerticalAlignment="Center"/>
+              </StackPanel>
+            </StackPanel>
+          </StackPanel>
+        </Grid>
+      </Border>
+
       <!-- RANKING -->
-      <StackPanel Margin="48,28,48,8" Spacing="4">
+      <StackPanel Margin="48,24,48,8" Spacing="4">
         <TextBlock Text="性价比排行" Classes="sectionTitle"/>
-        <TextBlock Text="按每百万 Token 月费从低到高" Classes="sectionSub" Margin="0,2,0,10"/>
+        <TextBlock Text="按每百万 Token 综合价格从低到高（订阅制=月费÷配额，按量付费=按上方构成加权）" Classes="sectionSub" Margin="0,2,0,10" TextWrapping="Wrap"/>
         <ItemsControl ItemsSource="{Binding Ranked}">
           <ItemsControl.ItemTemplate>
             <DataTemplate DataType="vm:PlanView">
@@ -94,9 +141,23 @@
                       <Border Background="{Binding TierBrush}" CornerRadius="4" Padding="7,2">
                         <TextBlock Text="{Binding Tier}" Foreground="White" FontSize="11" FontWeight="SemiBold"/>
                       </Border>
+                      <Border Background="#10B981" CornerRadius="4" Padding="6,1" IsVisible="{Binding IsPayAsYouGo}">
+                        <TextBlock Text="按量" Foreground="White" FontSize="10" FontWeight="SemiBold"/>
+                      </Border>
                       <TextBlock Text="{Binding FullName}" FontWeight="SemiBold" FontSize="15" Foreground="#111827"/>
                     </StackPanel>
                     <TextBlock Text="{Binding Subtitle}" FontSize="12" Foreground="#6B7280"/>
+                    <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding IsPayAsYouGo}" Margin="0,1,0,0">
+                      <TextBlock FontSize="11" Foreground="#9CA3AF">
+                        <Run Text="命中 "/><Run Text="{Binding CacheHitDisplay}" Foreground="#10B981"/>
+                      </TextBlock>
+                      <TextBlock FontSize="11" Foreground="#9CA3AF">
+                        <Run Text="未命中 "/><Run Text="{Binding CacheMissDisplay}" Foreground="#6B7280"/>
+                      </TextBlock>
+                      <TextBlock FontSize="11" Foreground="#9CA3AF">
+                        <Run Text="输出 "/><Run Text="{Binding OutputPriceDisplay}" Foreground="#1428A0"/>
+                      </TextBlock>
+                    </StackPanel>
                   </StackPanel>
                   <StackPanel Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,18,0">
                     <TextBlock Text="{Binding PerMillionDisplay}" FontSize="19" FontWeight="Bold" Foreground="#1428A0" HorizontalAlignment="Right"/>
@@ -148,22 +209,46 @@
 
                     <Border Background="White" Padding="16,14">
                       <StackPanel Spacing="13">
-                        <Grid ColumnDefinitions="*,Auto">
-                          <TextBlock Grid.Column="0" Classes="metricLabel" Text="月费（折算）" VerticalAlignment="Center"/>
-                          <TextBlock Grid.Column="1" Classes="metricValue" Text="{Binding PriceDisplay}"/>
-                        </Grid>
-                        <Grid ColumnDefinitions="*,Auto">
-                          <TextBlock Grid.Column="0" Classes="metricLabel" Text="原价" VerticalAlignment="Center"/>
-                          <TextBlock Grid.Column="1" Classes="metricValue" Text="{Binding OriginalPriceText}"/>
-                        </Grid>
-                        <Grid ColumnDefinitions="*,Auto">
-                          <TextBlock Grid.Column="0" Classes="metricLabel" Text="周配额" VerticalAlignment="Center"/>
-                          <TextBlock Grid.Column="1" Classes="metricValue" Text="{Binding WeeklyTokensText}"/>
-                        </Grid>
-                        <Grid ColumnDefinitions="*,Auto">
-                          <TextBlock Grid.Column="0" Classes="metricLabel" Text="月配额（估）" VerticalAlignment="Center"/>
-                          <TextBlock Grid.Column="1" Classes="metricValue" Text="{Binding MonthlyTokensText}"/>
-                        </Grid>
+                        <!-- 订阅制明细 -->
+                        <StackPanel Spacing="13" IsVisible="{Binding IsSubscription}">
+                          <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0" Classes="metricLabel" Text="月费（折算）" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Classes="metricValue" Text="{Binding PriceDisplay}"/>
+                          </Grid>
+                          <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0" Classes="metricLabel" Text="原价" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Classes="metricValue" Text="{Binding OriginalPriceText}"/>
+                          </Grid>
+                          <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0" Classes="metricLabel" Text="周配额" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Classes="metricValue" Text="{Binding WeeklyTokensText}"/>
+                          </Grid>
+                          <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0" Classes="metricLabel" Text="月配额（估）" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Classes="metricValue" Text="{Binding MonthlyTokensText}"/>
+                          </Grid>
+                        </StackPanel>
+
+                        <!-- 按量付费明细 -->
+                        <StackPanel Spacing="13" IsVisible="{Binding IsPayAsYouGo}">
+                          <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0" Classes="metricLabel" Text="缓存命中 / 1M" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Classes="metricValue" Text="{Binding CacheHitDisplay}" Foreground="#10B981"/>
+                          </Grid>
+                          <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0" Classes="metricLabel" Text="缓存未命中 / 1M" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Classes="metricValue" Text="{Binding CacheMissDisplay}"/>
+                          </Grid>
+                          <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0" Classes="metricLabel" Text="输出 / 1M" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Classes="metricValue" Text="{Binding OutputPriceDisplay}" Foreground="#1428A0"/>
+                          </Grid>
+                          <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0" Classes="metricLabel" Text="计费方式" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Classes="metricValue" Text="按量付费"/>
+                          </Grid>
+                        </StackPanel>
+
                         <Border Background="#F3F4F6" Height="1" Margin="0,1"/>
                         <Grid ColumnDefinitions="*,Auto">
                           <TextBlock Grid.Column="0" Classes="metricLabel" Text="每 1M Token" VerticalAlignment="Center"/>
@@ -188,7 +273,7 @@
         <StackPanel Spacing="4">
           <TextBlock Text="计算说明" FontWeight="SemiBold" FontSize="13" Foreground="#111827"/>
           <TextBlock FontSize="12" Foreground="#6B7280" TextWrapping="Wrap"
-                     Text="· 月配额 = 周配额 × (52 周 ÷ 12 月)；· 每 1M Token 月费 = 月费 ÷ 月配额(M token)；· 性价比排行按每 1M Token 月费从低到高，越低越划算；· 跨币种按上方汇率折算（默认 1 USD ≈ 7.028 CNY，即 151.2 USD = 1062.64 CNY）；· 1 亿 token = 100 M token。数据仅供参考，以官方为准。"/>
+                     Text="· 订阅制：月配额 = 周配额 × (52 周 ÷ 12 月)，每 1M Token 价格 = 月费 ÷ 月配额；· 按量付费（DeepSeek V4）：以 100M 输入为基准，按上方滑块构成（缓存命中 / 未命中 / 输出）加权计算综合每 1M Token 价格；· 排行按每 1M Token 综合价格从低到高，越低越划算；· 跨币种按上方汇率折算（默认 1 USD ≈ 7.028 CNY）；· 1 亿 token = 100 M token。数据仅供参考，以官方为准。"/>
         </StackPanel>
       </Border>
 
