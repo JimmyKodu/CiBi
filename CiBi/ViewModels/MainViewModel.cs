@@ -9,7 +9,7 @@ namespace CiBi.ViewModels;
 
 public sealed class MainViewModel : ViewModelBase
 {
-    private decimal _exchangeRate = 6.75m; // CNY per 1 USD
+    private decimal _exchangeRate = 7.0284391534391534391534391534m; // CNY per 1 USD (1062.64 / 151.2)
 
     public decimal ExchangeRate
     {
@@ -17,7 +17,7 @@ public sealed class MainViewModel : ViewModelBase
         set { this.RaiseAndSetIfChanged(ref _exchangeRate, value); Recompute(); }
     }
 
-    private string _exchangeRateText = "6.75";
+    private string _exchangeRateText = "7.0284";
     public string ExchangeRateText
     {
         get => _exchangeRateText;

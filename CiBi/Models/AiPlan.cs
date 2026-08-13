@@ -20,16 +20,16 @@ public sealed class AiPlan
 
     public static readonly IReadOnlyList<AiPlan> All =
     [
-        // V2 国际版 — base 80.18 M / week
+        // V2 国际版 — base 79.67 M / week
         new() { Id = "v2-lite-int", ShortName = "Lite 国际 V2", FullName = "GLM Coding Plan Lite 国际版 V2",
                 Tier = "Lite", Version = "V2", Region = "国际版",
-                PriceMonthly = 12.6m, Currency = "USD", WeeklyTokensMillions = 80.18m, TokenMultiplier = 1 },
+                PriceMonthly = 12.6m, Currency = "USD", WeeklyTokensMillions = 79.67m, TokenMultiplier = 1 },
         new() { Id = "v2-pro-int", ShortName = "Pro 国际 V2", FullName = "GLM Coding Plan Pro 国际版 V2",
                 Tier = "Pro", Version = "V2", Region = "国际版",
-                PriceMonthly = 50.4m, Currency = "USD", WeeklyTokensMillions = 80.18m * 5, TokenMultiplier = 5 },
+                PriceMonthly = 50.4m, Currency = "USD", WeeklyTokensMillions = 79.67m * 5, TokenMultiplier = 5 },
         new() { Id = "v2-max-int", ShortName = "Max 国际 V2", FullName = "GLM Coding Plan Max 国际版 V2",
                 Tier = "Max", Version = "V2", Region = "国际版",
-                PriceMonthly = 112m, Currency = "USD", WeeklyTokensMillions = 80.18m * 20, TokenMultiplier = 20 },
+                PriceMonthly = 112m, Currency = "USD", WeeklyTokensMillions = 79.67m * 20, TokenMultiplier = 20 },
 
         // V3 国际版 — base 87 M / week
         new() { Id = "v3-lite-int", ShortName = "Lite 国际 V3", FullName = "GLM Coding Plan Lite 国际版 V3",

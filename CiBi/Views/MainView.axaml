@@ -188,7 +188,7 @@
         <StackPanel Spacing="4">
           <TextBlock Text="计算说明" FontWeight="SemiBold" FontSize="13" Foreground="#111827"/>
           <TextBlock FontSize="12" Foreground="#6B7280" TextWrapping="Wrap"
-                     Text="· 月配额 = 周配额 × (52 周 ÷ 12 月)；· 每 1M Token 月费 = 月费 ÷ 月配额(M token)；· 性价比排行按每 1M Token 月费从低到高，越低越划算；· 跨币种按上方汇率折算（默认 1 USD = 6.75 CNY）；· 1 亿 token = 100 M token。数据仅供参考，以官方为准。"/>
+                     Text="· 月配额 = 周配额 × (52 周 ÷ 12 月)；· 每 1M Token 月费 = 月费 ÷ 月配额(M token)；· 性价比排行按每 1M Token 月费从低到高，越低越划算；· 跨币种按上方汇率折算（默认 1 USD ≈ 7.028 CNY，即 151.2 USD = 1062.64 CNY）；· 1 亿 token = 100 M token。数据仅供参考，以官方为准。"/>
         </StackPanel>
       </Border>
 
