@@ -33,7 +33,7 @@ public sealed class PlanView : ReactiveObject
     public string MonthlyTokensText => IsPayAsYouGo ? "不限" : $"{Plan.MonthlyTokensMillions:#,##0.0} M";
     public string Subtitle => IsPayAsYouGo
         ? $"{Plan.Version} · 按量付费 · 缓存命中/未命中/输出 单价"
-        : $"{Plan.Version} · {Plan.Region} · {WeeklyTokensText}/周 ×{TokenMultiplier}";
+        : $"{Plan.Version} · {Plan.Region} · {WeeklyTokensText}/周 ×{TokenMultiplier}{(string.IsNullOrEmpty(Plan.BillingCycle) ? "" : " · " + Plan.BillingCycle)}";
 
     public IBrush TierBrush => new SolidColorBrush(Color.Parse(Tier switch
     {
