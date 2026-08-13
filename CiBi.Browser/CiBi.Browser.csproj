@@ -5,6 +5,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- Declare up front so the .NET 10 wasm workload links SkiaSharp/HarfBuzzSharp native libs (Avalonia.Browser.targets sets it too late for the workload's native-link check). -->
     <WasmBuildNative>true</WasmBuildNative>
+    <PublishTrimmed>false</PublishTrimmed>
+    <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
   <ItemGroup>
