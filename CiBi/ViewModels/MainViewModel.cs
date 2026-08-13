@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
@@ -80,6 +81,43 @@ public sealed class MainViewModel : ViewModelBase
 
     public ObservableCollection<PlanView> Plans { get; } = new();
     public ObservableCollection<PlanView> Ranked { get; } = new();
+    public ObservableCollection<PlanView> VisiblePlans { get; } = new();
+
+    // 大类筛选（默认全选）
+    private readonly HashSet<string> _selRegions = new() { "国际版", "国内版", "按量付费" };
+    private readonly HashSet<string> _selVersions = new() { "V2", "V3" };
+    private readonly HashSet<string> _selTiers = new() { "Lite", "Pro", "Max" };
+    private readonly HashSet<string> _selCycles = new() { "年付", "季付", "月付" };
+
+    private static bool Has(HashSet<string> s, string k) => s.Contains(k);
+    private bool Toggle(HashSet<string> s, string k, bool v, string propName)
+    {
+        if (v == s.Contains(k)) return false;
+        if (v) s.Add(k); else s.Remove(k);
+        this.RaisePropertyChanged(propName);
+        Recompute();
+        return true;
+    }
+
+    public bool FilterIntl { get => Has(_selRegions, "国际版"); set => Toggle(_selRegions, "国际版", value, nameof(FilterIntl)); }
+    public bool FilterCn { get => Has(_selRegions, "国内版"); set => Toggle(_selRegions, "国内版", value, nameof(FilterCn)); }
+    public bool FilterPayG { get => Has(_selRegions, "按量付费"); set => Toggle(_selRegions, "按量付费", value, nameof(FilterPayG)); }
+    public bool FilterV2 { get => Has(_selVersions, "V2"); set => Toggle(_selVersions, "V2", value, nameof(FilterV2)); }
+    public bool FilterV3 { get => Has(_selVersions, "V3"); set => Toggle(_selVersions, "V3", value, nameof(FilterV3)); }
+    public bool FilterLite { get => Has(_selTiers, "Lite"); set => Toggle(_selTiers, "Lite", value, nameof(FilterLite)); }
+    public bool FilterPro { get => Has(_selTiers, "Pro"); set => Toggle(_selTiers, "Pro", value, nameof(FilterPro)); }
+    public bool FilterMax { get => Has(_selTiers, "Max"); set => Toggle(_selTiers, "Max", value, nameof(FilterMax)); }
+    public bool FilterYear { get => Has(_selCycles, "年付"); set => Toggle(_selCycles, "年付", value, nameof(FilterYear)); }
+    public bool FilterQuarter { get => Has(_selCycles, "季付"); set => Toggle(_selCycles, "季付", value, nameof(FilterQuarter)); }
+    public bool FilterMonth { get => Has(_selCycles, "月付"); set => Toggle(_selCycles, "月付", value, nameof(FilterMonth)); }
+
+    private bool IsVisible(AiPlan p) =>
+        _selRegions.Contains(p.Region) &&
+        // 版本筛选只针对订阅制；DeepSeek 的 V4 是模型版本，与 GLM 计费规则版本(V2/V3)含义不同
+        (p.Type == PlanType.PayAsYouGo || _selVersions.Contains(p.Version)) &&
+        // 档次筛选只针对订阅制；DeepSeek 的 Flash/Pro 与 GLM 套餐档次无关，不参与档次筛选
+        (p.Type == PlanType.PayAsYouGo || _selTiers.Contains(p.Tier)) &&
+        (string.IsNullOrEmpty(p.BillingCycle) || _selCycles.Contains(p.BillingCycle));
 
     public string ExchangeHint => DisplayCurrency == "CNY"
         ? "所有价格已按汇率折算为人民币（¥）"
@@ -133,24 +171,32 @@ public sealed class MainViewModel : ViewModelBase
             }
         }
 
-        var ordered = Plans.OrderBy(x => x.PerMillionValue).ToList();
+        // 仅对筛选可见项排序与排名
+        var ordered = Plans.Where(p => IsVisible(p.Plan)).OrderBy(x => x.PerMillionValue).ToList();
         for (var i = 0; i < ordered.Count; i++)
         {
             ordered[i].Rank = i + 1;
             ordered[i].IsBestValue = i == 0;
         }
 
-        var best = ordered[0].PerMillionValue;
-        var worst = ordered[^1].PerMillionValue;
-        foreach (var v in Plans)
+        if (ordered.Count > 0)
         {
-            var score = worst == best ? 1.0 : (double)((worst - v.PerMillionValue) / (worst - best));
-            v.ValueScore = Math.Clamp(score, 0, 1);
+            var best = ordered[0].PerMillionValue;
+            var worst = ordered[^1].PerMillionValue;
+            foreach (var v in ordered)
+            {
+                var score = worst == best ? 1.0 : (double)((worst - v.PerMillionValue) / (worst - best));
+                v.ValueScore = Math.Clamp(score, 0, 1);
+            }
         }
 
         Ranked.Clear();
         foreach (var v in ordered)
             Ranked.Add(v);
+
+        VisiblePlans.Clear();
+        foreach (var v in Plans.Where(p => IsVisible(p.Plan)))
+            VisiblePlans.Add(v);
 
         this.RaisePropertyChanged(nameof(ExchangeHint));
         this.RaisePropertyChanged(nameof(MixSummary));

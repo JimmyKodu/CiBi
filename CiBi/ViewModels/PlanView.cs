@@ -35,11 +35,11 @@ public sealed class PlanView : ReactiveObject
         ? $"{Plan.Version} · 按量付费 · 缓存命中/未命中/输出 单价"
         : $"{Plan.Version} · {Plan.Region} · {WeeklyTokensText}/周 ×{TokenMultiplier}{(string.IsNullOrEmpty(Plan.BillingCycle) ? "" : " · " + Plan.BillingCycle)}";
 
-    public IBrush TierBrush => new SolidColorBrush(Color.Parse(Tier switch
+    // 按量付费(DeepSeek)统一绿色系，与 GLM 订阅制档次视觉区分
+    public IBrush TierBrush => new SolidColorBrush(Color.Parse(IsPayAsYouGo ? "#10B981" : Tier switch
     {
         "Lite" => "#6B7280",
         "Pro" => "#0EA5E9",
-        "Flash" => "#10B981",
         _ => "#1428A0",
     }));
 
