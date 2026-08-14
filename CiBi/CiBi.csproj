@@ -13,7 +13,7 @@
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
+    <!-- 不引用 Avalonia.Fonts.Inter：项目用 NotoSansSC，Inter 字体包(wasm ~1.8MB decoded/913KB gzip)纯属浪费 -->
     <!-- Avalonia 12.x renamed Avalonia.ReactiveUI to ReactiveUI.Avalonia -->
     <PackageReference Include="ReactiveUI.Avalonia" Version="$(AvaloniaVersion)" />
   </ItemGroup>
