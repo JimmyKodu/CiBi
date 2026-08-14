@@ -7,8 +7,34 @@
     font-family: 'Outfit', sans-serif;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
     display: flex;
     pointer-events: none;
+}
+
+/* 启动进度条 */
+.splash-progress {
+    margin-top: 28px;
+    width: 260px;
+    text-align: center;
+}
+.splash-progress-track {
+    height: 6px;
+    background: rgba(127, 127, 127, 0.25);
+    border-radius: 3px;
+    overflow: hidden;
+}
+.splash-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: #1428A0;
+    border-radius: 3px;
+    transition: width 200ms ease-out;
+}
+.splash-progress-text {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    opacity: 0.65;
 }
 
 /* Light theme styles */
@@ -37,6 +63,14 @@
 
     .avalonia-splash a {
         color: white;
+    }
+
+    .splash-progress-text {
+        color: white;
+    }
+
+    .splash-progress-bar {
+        background: #8FA4FF;
     }
 }
 
