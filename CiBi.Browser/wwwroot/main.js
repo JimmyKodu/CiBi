@@ -6,11 +6,15 @@ if (!is_browser) throw new Error(`Expected to be running in a browser`);
 // 真实进度：hook fetch，对 _framework/ 的 .wasm/.js 用 XHR 加载（onprogress 给真实传输字节），按 已传输/总字节 计算
 const bar = document.getElementById('splash-progress-bar');
 const txt = document.getElementById('splash-progress-text');
+const file = document.getElementById('splash-progress-file');
 const setP = v => {
     if (bar) bar.style.width = v + '%';
     if (txt) txt.textContent = Math.round(v) + '%';
 };
+// 显示当前正在下载/加载的文件名（去掉哈希段，如 dotnet.native.xn6kila1sr.wasm → dotnet.native.wasm）
+const setFile = name => { if (file) file.textContent = name; };
 setP(0);
+setFile('加载资源…');
 
 const origFetch = window.fetch.bind(window);
 const resLoaded = Object.create(null);
@@ -44,6 +48,7 @@ window.fetch = function (input, init) {
         xhr.open('GET', url, true);
         xhr.responseType = 'arraybuffer';
         xhr.onprogress = e => {
+            setFile(url.split('/').pop().replace(/\.[a-z0-9]{8,}\.(wasm|js)$/i, '.$1'));
             if (e.lengthComputable) {
                 byteProgress = true;
                 resTotal[url] = e.total;
@@ -70,6 +75,7 @@ window.fetch = function (input, init) {
 };
 
 try {
+    setFile('初始化运行时…');
     const dotnetRuntime = await dotnet
         .withDiagnosticTracing(false)
         .withApplicationArgumentsFromQuery()
@@ -77,6 +83,7 @@ try {
     setP(99);
 
     const config = dotnetRuntime.getConfig();
+    setFile('启动应用…');
     await dotnetRuntime.runMain(config.mainAssemblyName, [globalThis.location.href]);
     setP(100);
 } finally {

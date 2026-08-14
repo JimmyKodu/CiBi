@@ -31,10 +31,28 @@
     border-radius: 3px;
     transition: width 200ms ease-out;
 }
-.splash-progress-text {
+.splash-progress-info {
     margin-top: 10px;
-    font-size: 0.85rem;
-    opacity: 0.65;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+.splash-progress-text {
+    font-weight: 600;
+    flex-shrink: 0;
+}
+.splash-progress-file {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.72rem;
+    opacity: 0.85;
+    text-align: right;
+    min-width: 0;
 }
 
 /* Light theme styles */
