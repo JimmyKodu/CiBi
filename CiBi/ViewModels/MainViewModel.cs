@@ -15,7 +15,7 @@ public sealed class MainViewModel : ViewModelBase
     public decimal ExchangeRate
     {
         get => _exchangeRate;
-        set { this.RaiseAndSetIfChanged(ref _exchangeRate, value); Recompute(); }
+        set { this.RaiseAndSetIfChanged(ref _exchangeRate, value); Recompute(false); }
     }
 
     private string _exchangeRateText = "7.0284";
@@ -34,7 +34,7 @@ public sealed class MainViewModel : ViewModelBase
     public string DisplayCurrency
     {
         get => _displayCurrency;
-        set { this.RaiseAndSetIfChanged(ref _displayCurrency, value); this.RaisePropertyChanged(nameof(IsCny)); this.RaisePropertyChanged(nameof(IsUsd)); Recompute(); }
+        set { this.RaiseAndSetIfChanged(ref _displayCurrency, value); this.RaisePropertyChanged(nameof(IsCny)); this.RaisePropertyChanged(nameof(IsUsd)); Recompute(false); }
     }
 
     public bool IsCny
@@ -59,7 +59,7 @@ public sealed class MainViewModel : ViewModelBase
             this.RaiseAndSetIfChanged(ref _cacheHitRatio, Math.Clamp(value, 0d, 100d));
             this.RaisePropertyChanged(nameof(CacheHitRatioText));
             this.RaisePropertyChanged(nameof(CacheMissRatioText));
-            Recompute();
+            Recompute(false);
         }
     }
 
@@ -71,7 +71,7 @@ public sealed class MainViewModel : ViewModelBase
     public double OutputRatio
     {
         get => _outputRatio;
-        set { this.RaiseAndSetIfChanged(ref _outputRatio, Math.Clamp(value, 0d, 100d)); this.RaisePropertyChanged(nameof(OutputRatioText)); Recompute(); }
+        set { this.RaiseAndSetIfChanged(ref _outputRatio, Math.Clamp(value, 0d, 100d)); this.RaisePropertyChanged(nameof(OutputRatioText)); Recompute(false); }
     }
 
     public string OutputRatioText => $"{OutputRatio:0}%";
@@ -130,14 +130,34 @@ public sealed class MainViewModel : ViewModelBase
         Recompute();
     }
 
-    private void Recompute()
+    private void Recompute() => Recompute(true);
+
+    // rebuildLists=true: 可见项变化(筛选)时重建排行/详情集合；false: 滑块/汇率/币种变化时仅 Move 重排，避免容器重建卡顿
+    private void Recompute(bool rebuildLists)
+    {
+        UpdateMetrics();
+        if (rebuildLists)
+        {
+            var visible = Plans.Where(p => IsVisible(p.Plan)).ToList();
+            RebuildCollection(Ranked, visible.OrderBy(x => x.PerMillionValue));
+            RebuildCollection(VisiblePlans, visible);
+        }
+        else
+        {
+            ReorderRanked();
+        }
+        ApplyRankProperties();
+        this.RaisePropertyChanged(nameof(ExchangeHint));
+        this.RaisePropertyChanged(nameof(MixSummary));
+    }
+
+    private void UpdateMetrics()
     {
         var symbol = PlanView.CurrencySymbol(DisplayCurrency);
         var hit = CacheHitRatio;
         var miss = 100d - hit;
         var tout = OutputRatio;
         var total = 100d + tout; // 输入 100M + 输出 outRatio M
-
         foreach (var v in Plans)
         {
             if (v.IsSubscription)
@@ -151,34 +171,38 @@ public sealed class MainViewModel : ViewModelBase
             else
             {
                 // 按量付费：以 100M 输入为基准，按构成比例算综合每 1M 价格（原始币种）
-                var hitM = hit;
-                var missM = miss;
-                var outM = tout;
-                var costLocal = (decimal)(hitM * (double)v.CacheHitPrice
-                                        + missM * (double)v.CacheMissPrice
-                                        + outM * (double)v.OutputPrice);
+                var costLocal = (decimal)(hit * (double)v.CacheHitPrice + miss * (double)v.CacheMissPrice + tout * (double)v.OutputPrice);
                 var perMLocal = total > 0 ? costLocal / (decimal)total : 0m;
                 var perM = Convert(perMLocal, v.Currency, DisplayCurrency, ExchangeRate);
-
                 v.PerMillionValue = perM;
                 v.PerMillionDisplay = perM <= 0 ? "-" : $"{symbol}{perM:#,##0.0000}";
                 v.PriceDisplay = v.PerMillionDisplay;
-
-                // 三档单价折算显示
                 v.CacheHitDisplay = $"{symbol}{Convert(v.CacheHitPrice, v.Currency, DisplayCurrency, ExchangeRate):0.####}";
                 v.CacheMissDisplay = $"{symbol}{Convert(v.CacheMissPrice, v.Currency, DisplayCurrency, ExchangeRate):0.####}";
                 v.OutputPriceDisplay = $"{symbol}{Convert(v.OutputPrice, v.Currency, DisplayCurrency, ExchangeRate):0.####}";
             }
         }
+    }
 
-        // 仅对筛选可见项排序与排名
-        var ordered = Plans.Where(p => IsVisible(p.Plan)).OrderBy(x => x.PerMillionValue).ToList();
+    // 用 Move 把各项移到排序后的位置，复用现有容器(不触发 DataTemplate 重建)
+    private void ReorderRanked()
+    {
+        var ordered = Ranked.OrderBy(x => x.PerMillionValue).ToList();
+        for (var i = 0; i < ordered.Count; i++)
+        {
+            var cur = Ranked.IndexOf(ordered[i]);
+            if (cur != i) Ranked.Move(cur, i);
+        }
+    }
+
+    private void ApplyRankProperties()
+    {
+        var ordered = Ranked.ToList();
         for (var i = 0; i < ordered.Count; i++)
         {
             ordered[i].Rank = i + 1;
             ordered[i].IsBestValue = i == 0;
         }
-
         if (ordered.Count > 0)
         {
             var best = ordered[0].PerMillionValue;
@@ -189,17 +213,12 @@ public sealed class MainViewModel : ViewModelBase
                 v.ValueScore = Math.Clamp(score, 0, 1);
             }
         }
+    }
 
-        Ranked.Clear();
-        foreach (var v in ordered)
-            Ranked.Add(v);
-
-        VisiblePlans.Clear();
-        foreach (var v in Plans.Where(p => IsVisible(p.Plan)))
-            VisiblePlans.Add(v);
-
-        this.RaisePropertyChanged(nameof(ExchangeHint));
-        this.RaisePropertyChanged(nameof(MixSummary));
+    private static void RebuildCollection(ObservableCollection<PlanView> col, IEnumerable<PlanView> items)
+    {
+        col.Clear();
+        foreach (var v in items) col.Add(v);
     }
 
     private static decimal Convert(decimal amount, string from, string to, decimal rate)
