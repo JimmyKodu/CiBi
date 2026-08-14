@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
@@ -8,11 +9,22 @@ namespace CiBi.Converters;
 /// <summary>Converts a bool to one of two brushes given via ConverterParameter "trueColor|falseColor".</summary>
 public sealed class BoolToBrushConverter : IValueConverter
 {
+    // Brush 缓存：每个颜色字符串只创建一次，避免每次 Convert 都 new SolidColorBrush + Color.Parse
+    private static readonly Dictionary<string, IBrush> BrushCache = new();
+
+    private static IBrush BrushFor(string hex)
+    {
+        if (BrushCache.TryGetValue(hex, out var b)) return b;
+        var brush = new SolidColorBrush(Color.Parse(hex));
+        BrushCache[hex] = brush;
+        return brush;
+    }
+
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         var b = value is bool bo && bo;
         var (t, f) = Parse(parameter?.ToString());
-        return new SolidColorBrush(Color.Parse(b ? t : f));
+        return BrushFor(b ? t : f);
     }
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>

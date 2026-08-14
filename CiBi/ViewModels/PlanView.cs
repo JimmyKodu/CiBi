@@ -35,13 +35,15 @@ public sealed class PlanView : ReactiveObject
         ? $"{Plan.Version} · 按量付费 · 缓存命中/未命中/输出 单价"
         : $"{Plan.Version} · {Plan.Region} · {WeeklyTokensText}/周 ×{TokenMultiplier}{(string.IsNullOrEmpty(Plan.BillingCycle) ? "" : " · " + Plan.BillingCycle)}";
 
+    // 缓存为静态 Brush，避免每次绑定求值都 new SolidColorBrush + Color.Parse（GC 压力）
+    private static readonly IBrush TierBrushPayg = new SolidColorBrush(Color.Parse("#10B981"));
+    private static readonly IBrush TierBrushLite = new SolidColorBrush(Color.Parse("#6B7280"));
+    private static readonly IBrush TierBrushPro = new SolidColorBrush(Color.Parse("#0EA5E9"));
+    private static readonly IBrush TierBrushMax = new SolidColorBrush(Color.Parse("#1428A0"));
     // 按量付费(DeepSeek)统一绿色系，与 GLM 订阅制档次视觉区分
-    public IBrush TierBrush => new SolidColorBrush(Color.Parse(IsPayAsYouGo ? "#10B981" : Tier switch
-    {
-        "Lite" => "#6B7280",
-        "Pro" => "#0EA5E9",
-        _ => "#1428A0",
-    }));
+    public IBrush TierBrush => IsPayAsYouGo
+        ? TierBrushPayg
+        : Tier switch { "Lite" => TierBrushLite, "Pro" => TierBrushPro, _ => TierBrushMax };
 
     private string _priceDisplay = "";
     public string PriceDisplay { get => _priceDisplay; set => this.RaiseAndSetIfChanged(ref _priceDisplay, value); }
@@ -61,15 +63,27 @@ public sealed class PlanView : ReactiveObject
     public string OutputPriceDisplay { get => _outputPriceDisplay; set => this.RaiseAndSetIfChanged(ref _outputPriceDisplay, value); }
 
     private int _rank;
-    public int Rank { get => _rank; set => this.RaiseAndSetIfChanged(ref _rank, value); }
+    public int Rank
+    {
+        get => _rank;
+        set { this.RaiseAndSetIfChanged(ref _rank, value); this.RaisePropertyChanged(nameof(RankText)); }
+    }
 
     public string RankText => $"#{Rank}";
 
     private bool _isBestValue;
-    public bool IsBestValue { get => _isBestValue; set => this.RaiseAndSetIfChanged(ref _isBestValue, value); }
+    public bool IsBestValue
+    {
+        get => _isBestValue;
+        set { this.RaiseAndSetIfChanged(ref _isBestValue, value); this.RaisePropertyChanged(nameof(ValueLabel)); }
+    }
 
     private double _valueScore;
-    public double ValueScore { get => _valueScore; set => this.RaiseAndSetIfChanged(ref _valueScore, value); }
+    public double ValueScore
+    {
+        get => _valueScore;
+        set { this.RaiseAndSetIfChanged(ref _valueScore, value); this.RaisePropertyChanged(nameof(ValueLabel)); }
+    }
 
     public string ValueLabel => IsBestValue ? "最优性价比" : $"性价比 {ValueScore * 100:0}%";
 
