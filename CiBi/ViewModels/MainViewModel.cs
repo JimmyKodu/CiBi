@@ -139,8 +139,9 @@ public sealed class MainViewModel : ViewModelBase
         if (rebuildLists)
         {
             var visible = Plans.Where(p => IsVisible(p.Plan)).ToList();
-            RebuildCollection(Ranked, visible.OrderBy(x => x.PerMillionValue));
-            RebuildCollection(VisiblePlans, visible);
+            // 差异同步：只增删变化的项，复用共同的容器(避免全部重建卡顿)
+            SyncCollection(Ranked, visible.OrderBy(x => x.PerMillionValue).ToList());
+            SyncCollection(VisiblePlans, visible);
         }
         else
         {
@@ -215,10 +216,17 @@ public sealed class MainViewModel : ViewModelBase
         }
     }
 
-    private static void RebuildCollection(ObservableCollection<PlanView> col, IEnumerable<PlanView> items)
+    // 差异同步：只增删变化的项并调整顺序，复用未变项的容器，避免 Clear+Add 全部重建
+    private static void SyncCollection(ObservableCollection<PlanView> col, IReadOnlyList<PlanView> target)
     {
-        col.Clear();
-        foreach (var v in items) col.Add(v);
+        for (var i = col.Count - 1; i >= 0; i--)
+            if (!target.Contains(col[i])) col.RemoveAt(i);
+        for (var i = 0; i < target.Count; i++)
+        {
+            var cur = col.IndexOf(target[i]);
+            if (cur == -1) col.Insert(i, target[i]);
+            else if (cur != i) col.Move(cur, i);
+        }
     }
 
     private static decimal Convert(decimal amount, string from, string to, decimal rate)
