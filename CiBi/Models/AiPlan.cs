@@ -24,10 +24,15 @@ public sealed class AiPlan
     // 订阅制但官方直接给定月配额（M）的套餐（如 MiniMax），>0 时优先于周配额折算
     public decimal MonthlyQuotaMillions { get; init; }
 
-    // 按量付费字段：每 1M token 单价（套餐币种）
+    // 按量付费字段：每 1M token 单价（套餐币种，空闲时段）
     public decimal CacheHitPrice { get; init; }        // 缓存命中
     public decimal CacheMissPrice { get; init; }       // 缓存未命中
     public decimal OutputPrice { get; init; }          // 输出
+
+    // 高峰时段单价（每 1M token；0 表示不分时段）
+    public decimal CacheHitPricePeak { get; init; }
+    public decimal CacheMissPricePeak { get; init; }
+    public decimal OutputPricePeak { get; init; }
 
     // 52 weeks / 12 months；直接给定月配额的套餐（MonthlyQuotaMillions > 0）不折算
     public decimal MonthlyTokensMillions => Type == PlanType.Subscription
@@ -87,13 +92,17 @@ public sealed class AiPlan
                 Tier = "Max", Version = "V3", Region = "国内版", Type = PlanType.Subscription, BillingCycle = "月付",
                 PriceMonthly = 1078m, Currency = "CNY", WeeklyTokensMillions = 87m * 14, TokenMultiplier = 14 },
 
-        // DeepSeek V4 按量付费（国内，CNY，每 1M token 单价）
+        // DeepSeek V4 按量付费（国内，CNY，每 1M token 单价；分空闲/高峰时段，高峰=空闲×2）
         new() { Id = "dsv4-flash", ShortName = "DeepSeek V4 Flash", FullName = "DeepSeek V4 Flash 按量付费",
                 Tier = "Flash", Version = "V4", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "CNY",
-                CacheHitPrice = 0.05m, CacheMissPrice = 1.5m, OutputPrice = 4.5m },
+                CacheHitPrice = 0.05m, CacheHitPricePeak = 0.10m,
+                CacheMissPrice = 1.5m, CacheMissPricePeak = 3.0m,
+                OutputPrice = 4.5m, OutputPricePeak = 9.0m },
         new() { Id = "dsv4-pro", ShortName = "DeepSeek V4 Pro", FullName = "DeepSeek V4 Pro 按量付费",
                 Tier = "Pro", Version = "V4", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "CNY",
-                CacheHitPrice = 0.15m, CacheMissPrice = 4.5m, OutputPrice = 13.5m },
+                CacheHitPrice = 0.15m, CacheHitPricePeak = 0.30m,
+                CacheMissPrice = 4.5m, CacheMissPricePeak = 9.0m,
+                OutputPrice = 13.5m, OutputPricePeak = 27.0m },
 
         // MiniMax Token Plan — 国内 CNY，月付，官方直接给定月配额（Plus 6亿 / Max 18亿 / Ultra 71亿）
         new() { Id = "mm-plus", ShortName = "MiniMax Plus", FullName = "MiniMax Token Plan Plus",

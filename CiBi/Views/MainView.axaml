@@ -152,6 +152,11 @@
                 <Slider Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding OutputRatio}" MinWidth="200" VerticalAlignment="Center"/>
                 <TextBlock Grid.Column="2" Text="{Binding OutputRatioText}" FontSize="12" FontWeight="SemiBold" Foreground="#1428A0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
               </Grid>
+              <Grid ColumnDefinitions="90,*,48">
+                <TextBlock Grid.Column="0" Text="高峰时段" FontSize="12" Foreground="#374151" VerticalAlignment="Center"/>
+                <Slider Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding PeakRatio}" MinWidth="200" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="2" Text="{Binding PeakRatioText}" FontSize="12" FontWeight="SemiBold" Foreground="#F59E0B" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+              </Grid>
             </StackPanel>
           </Grid>
 
@@ -382,7 +387,7 @@
         <StackPanel Spacing="4">
           <TextBlock Text="计算说明" FontWeight="SemiBold" FontSize="13" Foreground="#111827"/>
           <TextBlock FontSize="12" Foreground="#6B7280" TextWrapping="Wrap"
-                     Text="· 订阅制：月配额 = 周配额 × (52 周 ÷ 12 月)，每 1M Token 价格 = 月费 ÷ 月配额；· MiniMax Token Plan：月配额为官方直接给定（Plus 6亿 / Max 18亿 / Ultra 71亿），不折算；· 按量付费（DeepSeek V4）：以 100M 输入为基准，按上方滑块构成（缓存命中 / 未命中 / 输出）加权计算综合每 1M Token 价格；· 排行按每 1M Token 综合价格从低到高，越低越划算；· 跨币种按上方汇率折算（默认 1 USD ≈ 7.028 CNY）；· 1 亿 token = 100 M token。数据仅供参考，以官方为准。"/>
+                     Text="· 订阅制：月配额 = 周配额 × (52 周 ÷ 12 月)，每 1M Token 价格 = 月费 ÷ 月配额；· MiniMax Token Plan：月配额为官方直接给定（Plus 6亿 / Max 18亿 / Ultra 71亿），不折算；· 按量付费（DeepSeek V4）：以 100M 输入为基准，按上方滑块构成（缓存命中 / 未命中 / 输出）加权计算综合每 1M Token 价格；单价分空闲 / 高峰时段（高峰 = 空闲 ×2），按高峰时段占比线性加权；· 排行按每 1M Token 综合价格从低到高，越低越划算；· 跨币种按上方汇率折算（默认 1 USD ≈ 7.028 CNY）；· 1 亿 token = 100 M token。数据仅供参考，以官方为准。"/>
         </StackPanel>
       </Border>
 

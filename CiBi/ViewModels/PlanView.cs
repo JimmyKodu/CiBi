@@ -28,6 +28,9 @@ public sealed class PlanView : ReactiveObject
     public decimal CacheHitPrice => Plan.CacheHitPrice;
     public decimal CacheMissPrice => Plan.CacheMissPrice;
     public decimal OutputPrice => Plan.OutputPrice;
+    public decimal CacheHitPricePeak => Plan.CacheHitPricePeak;
+    public decimal CacheMissPricePeak => Plan.CacheMissPricePeak;
+    public decimal OutputPricePeak => Plan.OutputPricePeak;
 
     public string OriginalPriceText => IsPayAsYouGo ? "—" : $"{CurrencySymbol(Plan.Currency)}{Plan.PriceMonthly:0.##}";
     public string WeeklyTokensText => IsPayAsYouGo || IsMonthlyQuota ? "—" : $"{Plan.WeeklyTokensMillions:#,##0.0} M";

@@ -77,6 +77,16 @@ public sealed class MainViewModel : ViewModelBase
 
     public string OutputRatioText => $"{OutputRatio:0}%";
 
+    // 高峰时段占比（0-100，0=全空闲）；DeepSeek V4 分空闲/高峰两档单价，按此比例线性加权
+    private double _peakRatio = 0d;
+    public double PeakRatio
+    {
+        get => _peakRatio;
+        set { this.RaiseAndSetIfChanged(ref _peakRatio, Math.Clamp(value, 0d, 100d)); this.RaisePropertyChanged(nameof(PeakRatioText)); Recompute(false); }
+    }
+
+    public string PeakRatioText => $"{PeakRatio:0}%";
+
     // 比例条三段像素宽：视图回填轨道宽度后按占比换算（段间各留 4px 间隙）
     private double _mixTrackWidth = 320d;
     public double MixTrackWidth
@@ -109,7 +119,7 @@ public sealed class MainViewModel : ViewModelBase
     }
 
     public string MixSummary =>
-        $"输入 100M = 缓存命中 {CacheHitRatio:0}M · 缓存未命中 {100 - CacheHitRatio:0}M，输出 {OutputRatio:0}M（综合 {100 + OutputRatio:0}M）";
+        $"输入 100M = 缓存命中 {CacheHitRatio:0}M · 缓存未命中 {100 - CacheHitRatio:0}M，输出 {OutputRatio:0}M（综合 {100 + OutputRatio:0}M）；高峰时段占比 {PeakRatio:0}% · 空闲 {100 - PeakRatio:0}%";
 
     public ObservableCollection<PlanView> Plans { get; } = new();
     public ObservableCollection<PlanView> Ranked { get; } = new();
@@ -204,16 +214,22 @@ public sealed class MainViewModel : ViewModelBase
             }
             else
             {
-                // 按量付费：以 100M 输入为基准，按构成比例算综合每 1M 价格（原始币种）
-                var costLocal = (decimal)(hit * (double)v.CacheHitPrice + miss * (double)v.CacheMissPrice + tout * (double)v.OutputPrice);
+                // 按量付费：以 100M 输入为基准，按构成比例算综合每 1M 价格（原始币种）；
+                // 单价按高峰时段占比在空闲/高峰两档间线性加权
+                var pk = (decimal)(PeakRatio / 100d);
+                decimal Blend(decimal offPeak, decimal peak) => offPeak + (peak - offPeak) * pk;
+                var hitP = Blend(v.CacheHitPrice, v.CacheHitPricePeak);
+                var missP = Blend(v.CacheMissPrice, v.CacheMissPricePeak);
+                var outP = Blend(v.OutputPrice, v.OutputPricePeak);
+                var costLocal = (decimal)(hit * (double)hitP + miss * (double)missP + tout * (double)outP);
                 var perMLocal = total > 0 ? costLocal / (decimal)total : 0m;
                 var perM = Convert(perMLocal, v.Currency, DisplayCurrency, ExchangeRate);
                 v.PerMillionValue = perM;
                 v.PerMillionDisplay = perM <= 0 ? "-" : $"{symbol}{perM:#,##0.0000}";
                 v.PriceDisplay = v.PerMillionDisplay;
-                v.CacheHitDisplay = $"{symbol}{Convert(v.CacheHitPrice, v.Currency, DisplayCurrency, ExchangeRate):0.####}";
-                v.CacheMissDisplay = $"{symbol}{Convert(v.CacheMissPrice, v.Currency, DisplayCurrency, ExchangeRate):0.####}";
-                v.OutputPriceDisplay = $"{symbol}{Convert(v.OutputPrice, v.Currency, DisplayCurrency, ExchangeRate):0.####}";
+                v.CacheHitDisplay = $"{symbol}{Convert(hitP, v.Currency, DisplayCurrency, ExchangeRate):0.####}";
+                v.CacheMissDisplay = $"{symbol}{Convert(missP, v.Currency, DisplayCurrency, ExchangeRate):0.####}";
+                v.OutputPriceDisplay = $"{symbol}{Convert(outP, v.Currency, DisplayCurrency, ExchangeRate):0.####}";
             }
         }
     }
