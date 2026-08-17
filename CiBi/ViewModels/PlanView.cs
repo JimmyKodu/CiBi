@@ -18,6 +18,7 @@ public sealed class PlanView : ReactiveObject
     public PlanType Type => Plan.Type;
     public bool IsPayAsYouGo => Plan.Type == PlanType.PayAsYouGo;
     public bool IsSubscription => Plan.Type == PlanType.Subscription;
+    public bool IsMonthlyQuota => Plan.MonthlyQuotaMillions > 0;   // 官方直接给定月配额（如 MiniMax）
     public int TokenMultiplier => Plan.TokenMultiplier;
     public decimal WeeklyTokensMillions => Plan.WeeklyTokensMillions;
     public decimal MonthlyTokensMillions => Plan.MonthlyTokensMillions;
@@ -29,21 +30,26 @@ public sealed class PlanView : ReactiveObject
     public decimal OutputPrice => Plan.OutputPrice;
 
     public string OriginalPriceText => IsPayAsYouGo ? "—" : $"{CurrencySymbol(Plan.Currency)}{Plan.PriceMonthly:0.##}";
-    public string WeeklyTokensText => IsPayAsYouGo ? "不限" : $"{Plan.WeeklyTokensMillions:#,##0.0} M";
+    public string WeeklyTokensText => IsPayAsYouGo || IsMonthlyQuota ? "—" : $"{Plan.WeeklyTokensMillions:#,##0.0} M";
     public string MonthlyTokensText => IsPayAsYouGo ? "不限" : $"{Plan.MonthlyTokensMillions:#,##0.0} M";
     public string Subtitle => IsPayAsYouGo
         ? $"{Plan.Version} · 按量付费 · 缓存命中/未命中/输出 单价"
-        : $"{Plan.Version} · {Plan.Region} · {WeeklyTokensText}/周 ×{TokenMultiplier}{(string.IsNullOrEmpty(Plan.BillingCycle) ? "" : " · " + Plan.BillingCycle)}";
+        : IsMonthlyQuota
+            ? $"{Plan.Region} · 月付 · 月配额 {MonthlyTokensText}"
+            : $"{Plan.Version} · {Plan.Region} · {WeeklyTokensText}/周 ×{TokenMultiplier}{(string.IsNullOrEmpty(Plan.BillingCycle) ? "" : " · " + Plan.BillingCycle)}";
 
     // 缓存为静态 Brush，避免每次绑定求值都 new SolidColorBrush + Color.Parse（GC 压力）
     private static readonly IBrush TierBrushPayg = new SolidColorBrush(Color.Parse("#10B981"));
     private static readonly IBrush TierBrushLite = new SolidColorBrush(Color.Parse("#6B7280"));
     private static readonly IBrush TierBrushPro = new SolidColorBrush(Color.Parse("#0EA5E9"));
     private static readonly IBrush TierBrushMax = new SolidColorBrush(Color.Parse("#1428A0"));
+    // MiniMax 档次配色：Plus 琥珀 / Ultra 紫，与 GLM 档次视觉区分（Max 落入默认深蓝）
+    private static readonly IBrush TierBrushPlus = new SolidColorBrush(Color.Parse("#F59E0B"));
+    private static readonly IBrush TierBrushUltra = new SolidColorBrush(Color.Parse("#7C3AED"));
     // 按量付费(DeepSeek)统一绿色系，与 GLM 订阅制档次视觉区分
     public IBrush TierBrush => IsPayAsYouGo
         ? TierBrushPayg
-        : Tier switch { "Lite" => TierBrushLite, "Pro" => TierBrushPro, _ => TierBrushMax };
+        : Tier switch { "Lite" => TierBrushLite, "Pro" => TierBrushPro, "Plus" => TierBrushPlus, "Ultra" => TierBrushUltra, _ => TierBrushMax };
 
     private string _priceDisplay = "";
     public string PriceDisplay { get => _priceDisplay; set => this.RaiseAndSetIfChanged(ref _priceDisplay, value); }

@@ -21,13 +21,18 @@ public sealed class AiPlan
     public decimal WeeklyTokensMillions { get; init; }
     public int TokenMultiplier { get; init; }          // ×1 / ×5 / ×6 / ×14 / ×20
 
+    // 订阅制但官方直接给定月配额（M）的套餐（如 MiniMax），>0 时优先于周配额折算
+    public decimal MonthlyQuotaMillions { get; init; }
+
     // 按量付费字段：每 1M token 单价（套餐币种）
     public decimal CacheHitPrice { get; init; }        // 缓存命中
     public decimal CacheMissPrice { get; init; }       // 缓存未命中
     public decimal OutputPrice { get; init; }          // 输出
 
-    // 52 weeks / 12 months
-    public decimal MonthlyTokensMillions => Type == PlanType.Subscription ? WeeklyTokensMillions * (52m / 12m) : 0m;
+    // 52 weeks / 12 months；直接给定月配额的套餐（MonthlyQuotaMillions > 0）不折算
+    public decimal MonthlyTokensMillions => Type == PlanType.Subscription
+        ? (MonthlyQuotaMillions > 0 ? MonthlyQuotaMillions : WeeklyTokensMillions * (52m / 12m))
+        : 0m;
 
     public static readonly IReadOnlyList<AiPlan> All =
     [
@@ -89,5 +94,16 @@ public sealed class AiPlan
         new() { Id = "dsv4-pro", ShortName = "DeepSeek V4 Pro", FullName = "DeepSeek V4 Pro 按量付费",
                 Tier = "Pro", Version = "V4", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "CNY",
                 CacheHitPrice = 0.15m, CacheMissPrice = 4.5m, OutputPrice = 13.5m },
+
+        // MiniMax Token Plan — 国内 CNY，月付，官方直接给定月配额（Plus 6亿 / Max 18亿 / Ultra 71亿）
+        new() { Id = "mm-plus", ShortName = "MiniMax Plus", FullName = "MiniMax Token Plan Plus",
+                Tier = "Plus", Version = "—", Region = "MiniMax", Type = PlanType.Subscription,
+                PriceMonthly = 49m, Currency = "CNY", MonthlyQuotaMillions = 600m },
+        new() { Id = "mm-max", ShortName = "MiniMax Max", FullName = "MiniMax Token Plan Max",
+                Tier = "Max", Version = "—", Region = "MiniMax", Type = PlanType.Subscription,
+                PriceMonthly = 119m, Currency = "CNY", MonthlyQuotaMillions = 1800m },
+        new() { Id = "mm-ultra", ShortName = "MiniMax Ultra", FullName = "MiniMax Token Plan Ultra",
+                Tier = "Ultra", Version = "—", Region = "MiniMax", Type = PlanType.Subscription,
+                PriceMonthly = 469m, Currency = "CNY", MonthlyQuotaMillions = 7100m },
     ];
 }

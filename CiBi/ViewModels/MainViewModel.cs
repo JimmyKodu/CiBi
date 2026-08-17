@@ -116,7 +116,7 @@ public sealed class MainViewModel : ViewModelBase
     public ObservableCollection<PlanView> VisiblePlans { get; } = new();
 
     // 大类筛选（默认全选）
-    private readonly HashSet<string> _selRegions = new() { "国际版", "国内版", "按量付费" };
+    private readonly HashSet<string> _selRegions = new() { "国际版", "国内版", "按量付费", "MiniMax" };
     private readonly HashSet<string> _selVersions = new() { "V2", "V3" };
     private readonly HashSet<string> _selTiers = new() { "Lite", "Pro", "Max" };
     private readonly HashSet<string> _selCycles = new() { "年付", "季付", "月付" };
@@ -134,6 +134,7 @@ public sealed class MainViewModel : ViewModelBase
     public bool FilterIntl { get => Has(_selRegions, "国际版"); set => Toggle(_selRegions, "国际版", value, nameof(FilterIntl)); }
     public bool FilterCn { get => Has(_selRegions, "国内版"); set => Toggle(_selRegions, "国内版", value, nameof(FilterCn)); }
     public bool FilterPayG { get => Has(_selRegions, "按量付费"); set => Toggle(_selRegions, "按量付费", value, nameof(FilterPayG)); }
+    public bool FilterMiniMax { get => Has(_selRegions, "MiniMax"); set => Toggle(_selRegions, "MiniMax", value, nameof(FilterMiniMax)); }
     public bool FilterV2 { get => Has(_selVersions, "V2"); set => Toggle(_selVersions, "V2", value, nameof(FilterV2)); }
     public bool FilterV3 { get => Has(_selVersions, "V3"); set => Toggle(_selVersions, "V3", value, nameof(FilterV3)); }
     public bool FilterLite { get => Has(_selTiers, "Lite"); set => Toggle(_selTiers, "Lite", value, nameof(FilterLite)); }
@@ -145,10 +146,10 @@ public sealed class MainViewModel : ViewModelBase
 
     private bool IsVisible(AiPlan p) =>
         _selRegions.Contains(p.Region) &&
-        // 版本筛选只针对订阅制；DeepSeek 的 V4 是模型版本，与 GLM 计费规则版本(V2/V3)含义不同
-        (p.Type == PlanType.PayAsYouGo || _selVersions.Contains(p.Version)) &&
-        // 档次筛选只针对订阅制；DeepSeek 的 Flash/Pro 与 GLM 套餐档次无关，不参与档次筛选
-        (p.Type == PlanType.PayAsYouGo || _selTiers.Contains(p.Tier)) &&
+        // 版本/档次筛选只针对 GLM 订阅套餐；DeepSeek 的 V4/Flash 是模型版本与档次，
+        // MiniMax 的 Plus/Max/Ultra 与 GLM 计费版本(V2/V3)、档次(Lite/Pro/Max)体系无关，均不参与这两组筛选
+        (p.Type == PlanType.PayAsYouGo || p.Region == "MiniMax"
+            || (_selVersions.Contains(p.Version) && _selTiers.Contains(p.Tier))) &&
         (string.IsNullOrEmpty(p.BillingCycle) || _selCycles.Contains(p.BillingCycle));
 
     public string ExchangeHint => DisplayCurrency == "CNY"
