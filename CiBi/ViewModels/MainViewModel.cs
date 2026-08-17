@@ -77,8 +77,8 @@ public sealed class MainViewModel : ViewModelBase
 
     public string OutputRatioText => $"{OutputRatio:0}%";
 
-    // 高峰时段占比（0-100，0=全空闲）；DeepSeek V4 分空闲/高峰两档单价，按此比例线性加权
-    private double _peakRatio = 0d;
+    // 高峰时段占比（0-100，默认 100=全高峰）；DeepSeek V4 分空闲/高峰两档单价，按此比例线性加权
+    private double _peakRatio = 100d;
     public double PeakRatio
     {
         get => _peakRatio;
