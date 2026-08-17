@@ -59,6 +59,7 @@ public sealed class MainViewModel : ViewModelBase
             this.RaiseAndSetIfChanged(ref _cacheHitRatio, Math.Clamp(value, 0d, 100d));
             this.RaisePropertyChanged(nameof(CacheHitRatioText));
             this.RaisePropertyChanged(nameof(CacheMissRatioText));
+            UpdateMixBar();
             Recompute(false);
         }
     }
@@ -71,10 +72,41 @@ public sealed class MainViewModel : ViewModelBase
     public double OutputRatio
     {
         get => _outputRatio;
-        set { this.RaiseAndSetIfChanged(ref _outputRatio, Math.Clamp(value, 0d, 100d)); this.RaisePropertyChanged(nameof(OutputRatioText)); Recompute(false); }
+        set { this.RaiseAndSetIfChanged(ref _outputRatio, Math.Clamp(value, 0d, 100d)); this.RaisePropertyChanged(nameof(OutputRatioText)); UpdateMixBar(); Recompute(false); }
     }
 
     public string OutputRatioText => $"{OutputRatio:0}%";
+
+    // 比例条三段像素宽：视图回填轨道宽度后按占比换算（段间各留 4px 间隙）
+    private double _mixTrackWidth = 320d;
+    public double MixTrackWidth
+    {
+        get => _mixTrackWidth;
+        set
+        {
+            if (Math.Abs(_mixTrackWidth - value) < 0.5) return;
+            _mixTrackWidth = value;
+            UpdateMixBar();
+        }
+    }
+
+    private double _hitPx;
+    public double HitPx { get => _hitPx; private set => this.RaiseAndSetIfChanged(ref _hitPx, value); }
+
+    private double _missPx;
+    public double MissPx { get => _missPx; private set => this.RaiseAndSetIfChanged(ref _missPx, value); }
+
+    private double _outPx;
+    public double OutPx { get => _outPx; private set => this.RaiseAndSetIfChanged(ref _outPx, value); }
+
+    private void UpdateMixBar()
+    {
+        var total = 100d + OutputRatio; // 命中+未命中=100，输出额外
+        var usable = Math.Max(0d, _mixTrackWidth - 8d);
+        HitPx = usable * CacheHitRatio / total;
+        MissPx = usable * (100d - CacheHitRatio) / total;
+        OutPx = usable * OutputRatio / total;
+    }
 
     public string MixSummary =>
         $"输入 100M = 缓存命中 {CacheHitRatio:0}M · 缓存未命中 {100 - CacheHitRatio:0}M，输出 {OutputRatio:0}M（综合 {100 + OutputRatio:0}M）";

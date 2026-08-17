@@ -23,13 +23,45 @@
     background: rgba(127, 127, 127, 0.25);
     border-radius: 3px;
     overflow: hidden;
+    position: relative;
 }
 .splash-progress-bar {
     height: 100%;
     width: 0%;
-    background: #1428A0;
+    background: linear-gradient(90deg, #3B82F6, #1428A0);
     border-radius: 3px;
     transition: width 200ms ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 纯 CSS 扫光：置于填充条内部，只在当前进度范围内扫过（0 → 当前进度）；
+   合成器驱动的 transform 动画，不依赖 JS，主线程阻塞时依然流动 */
+.splash-progress-shimmer {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 40%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    animation: splash-sweep 1.4s linear infinite;
+    will-change: transform;
+    pointer-events: none;
+}
+
+@keyframes splash-sweep {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(250%); }
+}
+
+#splash-progress-file.pulse {
+    animation: splash-pulse 1.2s ease-in-out infinite;
+    will-change: opacity;
+}
+
+@keyframes splash-pulse {
+    0%, 100% { opacity: .85; }
+    50% { opacity: .35; }
 }
 .splash-progress-info {
     margin-top: 10px;
