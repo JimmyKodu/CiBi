@@ -125,11 +125,11 @@ public sealed class MainViewModel : ViewModelBase
     public ObservableCollection<PlanView> Ranked { get; } = new();
     public ObservableCollection<PlanView> VisiblePlans { get; } = new();
 
-    // 大类筛选（默认全选）
-    private readonly HashSet<string> _selRegions = new() { "国际版", "国内版", "按量付费", "MiniMax" };
-    private readonly HashSet<string> _selVersions = new() { "V2", "V3" };
-    private readonly HashSet<string> _selTiers = new() { "Lite", "Pro", "Max" };
-    private readonly HashSet<string> _selCycles = new() { "年付", "季付", "月付" };
+    // 大类筛选（默认只勾选：国内版、按量付费、V3、Lite、月付）
+    private readonly HashSet<string> _selRegions = new() { "国内版", "按量付费" };
+    private readonly HashSet<string> _selVersions = new() { "V3" };
+    private readonly HashSet<string> _selTiers = new() { "Lite" };
+    private readonly HashSet<string> _selCycles = new() { "月付" };
 
     private static bool Has(HashSet<string> s, string k) => s.Contains(k);
     private bool Toggle(HashSet<string> s, string k, bool v, string propName)

@@ -34,6 +34,9 @@ public sealed class AiPlan
     public decimal CacheMissPricePeak { get; init; }
     public decimal OutputPricePeak { get; init; }
 
+    // 上下文窗口（tokens；0 = 未公布）
+    public long ContextWindowTokens { get; init; }
+
     // 52 weeks / 12 months；直接给定月配额的套餐（MonthlyQuotaMillions > 0）不折算
     public decimal MonthlyTokensMillions => Type == PlanType.Subscription
         ? (MonthlyQuotaMillions > 0 ? MonthlyQuotaMillions : WeeklyTokensMillions * (52m / 12m))
@@ -103,6 +106,23 @@ public sealed class AiPlan
                 CacheHitPrice = 0.15m, CacheHitPricePeak = 0.30m,
                 CacheMissPrice = 4.5m, CacheMissPricePeak = 9.0m,
                 OutputPrice = 13.5m, OutputPricePeak = 27.0m },
+
+        // 以下按量付费模型不分时段：高峰单价与空闲同价
+        new() { Id = "glm-5.3-payg", ShortName = "GLM-5.3", FullName = "GLM-5.3 按量付费",
+                Tier = "GLM", Version = "5.3", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "CNY",
+                CacheHitPrice = 2m, CacheHitPricePeak = 2m,
+                CacheMissPrice = 8m, CacheMissPricePeak = 8m,
+                OutputPrice = 28m, OutputPricePeak = 28m },
+        new() { Id = "qwen3.8-max-payg", ShortName = "Qwen3.8-Max", FullName = "Qwen3.8-Max 按量付费",
+                Tier = "Qwen", Version = "3.8", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "CNY",
+                CacheHitPrice = 1.5m, CacheHitPricePeak = 1.5m,
+                CacheMissPrice = 12m, CacheMissPricePeak = 12m,
+                OutputPrice = 36m, OutputPricePeak = 36m },
+        new() { Id = "kimi-k3-payg", ShortName = "Kimi K3", FullName = "Kimi K3 按量付费",
+                Tier = "Kimi", Version = "K3", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "CNY",
+                CacheHitPrice = 2m, CacheHitPricePeak = 2m,
+                CacheMissPrice = 20m, CacheMissPricePeak = 20m,
+                OutputPrice = 100m, OutputPricePeak = 100m, ContextWindowTokens = 1_048_576 },
 
         // MiniMax Token Plan — 国内 CNY，月付，官方直接给定月配额（Plus 6亿 / Max 18亿 / Ultra 71亿）
         new() { Id = "mm-plus", ShortName = "MiniMax Plus", FullName = "MiniMax Token Plan Plus",

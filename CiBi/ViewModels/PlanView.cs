@@ -33,6 +33,7 @@ public sealed class PlanView : ReactiveObject
     public decimal OutputPricePeak => Plan.OutputPricePeak;
 
     public string OriginalPriceText => IsPayAsYouGo ? "—" : $"{CurrencySymbol(Plan.Currency)}{Plan.PriceMonthly:0.##}";
+    public string ContextWindowText => Plan.ContextWindowTokens > 0 ? $"{Plan.ContextWindowTokens:#,##0} tokens" : "—";
     public string WeeklyTokensText => IsPayAsYouGo || IsMonthlyQuota ? "—" : $"{Plan.WeeklyTokensMillions:#,##0.0} M";
     public string MonthlyTokensText => IsPayAsYouGo ? "不限" : $"{Plan.MonthlyTokensMillions:#,##0.0} M";
     public string Subtitle => IsPayAsYouGo
