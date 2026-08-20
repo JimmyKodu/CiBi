@@ -254,10 +254,7 @@
                   <StackPanel Grid.Column="2" Margin="14,0,0,0" VerticalAlignment="Center" Spacing="3">
                     <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                       <Border Background="{Binding TierBrush}" CornerRadius="4" Padding="7,2">
-                        <TextBlock Text="{Binding Tier}" Foreground="White" FontSize="11" FontWeight="SemiBold"/>
-                      </Border>
-                      <Border Background="#10B981" CornerRadius="4" Padding="6,1" IsVisible="{Binding IsPayAsYouGo}">
-                        <TextBlock Text="按量" Foreground="White" FontSize="10" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding BadgeText}" Foreground="White" FontSize="11" FontWeight="SemiBold"/>
                       </Border>
                       <TextBlock Text="{Binding FullName}" FontWeight="SemiBold" FontSize="15" Foreground="#111827"/>
                     </StackPanel>
@@ -311,7 +308,7 @@
                       <StackPanel Spacing="6">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                           <Border Background="{Binding TierBrush}" CornerRadius="4" Padding="7,2">
-                            <TextBlock Text="{Binding Tier}" Foreground="White" FontSize="11" FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding BadgeText}" Foreground="White" FontSize="11" FontWeight="SemiBold"/>
                           </Border>
                           <TextBlock Text="{Binding Version}" FontSize="12" Foreground="#6B7280" VerticalAlignment="Center"/>
                           <TextBlock Text="·" Foreground="#D1D5DB" VerticalAlignment="Center"/>

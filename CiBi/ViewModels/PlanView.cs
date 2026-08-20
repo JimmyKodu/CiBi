@@ -11,6 +11,8 @@ public sealed class PlanView : ReactiveObject
 
     public string ShortName => Plan.ShortName;
     public string FullName => Plan.FullName;
+    // 徽牌统一表示"档次"；按量付费无档次概念，统一显示"按量"（模型身份由全称承担）
+    public string BadgeText => IsPayAsYouGo ? "按量" : Plan.Tier;
     public string Tier => Plan.Tier;
     public string Version => Plan.Version;
     public string Region => Plan.Region;
