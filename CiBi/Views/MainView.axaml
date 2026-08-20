@@ -97,6 +97,7 @@
                 <CheckBox Content="国内版" IsChecked="{Binding FilterCn}"/>
                 <CheckBox Content="按量付费" IsChecked="{Binding FilterPayG}"/>
                 <CheckBox Content="MiniMax" IsChecked="{Binding FilterMiniMax}"/>
+                <CheckBox Content="Kimi" IsChecked="{Binding FilterKimi}"/>
               </StackPanel>
             </StackPanel>
             <StackPanel Margin="0,0,28,8">
@@ -115,7 +116,7 @@
               </StackPanel>
             </StackPanel>
             <StackPanel Margin="0,0,0,8">
-              <TextBlock Text="计费周期（仅国内版 V3）" FontSize="11" Foreground="#9CA3AF" Margin="0,0,0,4"/>
+              <TextBlock Text="计费周期（国内版 V3 / Kimi）" FontSize="11" Foreground="#9CA3AF" Margin="0,0,0,4"/>
               <StackPanel Orientation="Horizontal" Spacing="12">
                 <CheckBox Content="年付" IsChecked="{Binding FilterYear}"/>
                 <CheckBox Content="季付" IsChecked="{Binding FilterQuarter}"/>

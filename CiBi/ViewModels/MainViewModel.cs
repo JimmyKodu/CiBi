@@ -145,6 +145,7 @@ public sealed class MainViewModel : ViewModelBase
     public bool FilterCn { get => Has(_selRegions, "国内版"); set => Toggle(_selRegions, "国内版", value, nameof(FilterCn)); }
     public bool FilterPayG { get => Has(_selRegions, "按量付费"); set => Toggle(_selRegions, "按量付费", value, nameof(FilterPayG)); }
     public bool FilterMiniMax { get => Has(_selRegions, "MiniMax"); set => Toggle(_selRegions, "MiniMax", value, nameof(FilterMiniMax)); }
+    public bool FilterKimi { get => Has(_selRegions, "Kimi"); set => Toggle(_selRegions, "Kimi", value, nameof(FilterKimi)); }
     public bool FilterV2 { get => Has(_selVersions, "V2"); set => Toggle(_selVersions, "V2", value, nameof(FilterV2)); }
     public bool FilterV3 { get => Has(_selVersions, "V3"); set => Toggle(_selVersions, "V3", value, nameof(FilterV3)); }
     public bool FilterLite { get => Has(_selTiers, "Lite"); set => Toggle(_selTiers, "Lite", value, nameof(FilterLite)); }
@@ -157,8 +158,8 @@ public sealed class MainViewModel : ViewModelBase
     private bool IsVisible(AiPlan p) =>
         _selRegions.Contains(p.Region) &&
         // 版本/档次筛选只针对 GLM 订阅套餐；DeepSeek 的 V4/Flash 是模型版本与档次，
-        // MiniMax 的 Plus/Max/Ultra 与 GLM 计费版本(V2/V3)、档次(Lite/Pro/Max)体系无关，均不参与这两组筛选
-        (p.Type == PlanType.PayAsYouGo || p.Region == "MiniMax"
+        // MiniMax 的 Plus/Max/Ultra 与 Kimi 的 Moderato 和 GLM 计费版本(V2/V3)、档次(Lite/Pro/Max)体系无关，均不参与这两组筛选
+        (p.Type == PlanType.PayAsYouGo || p.Region is "MiniMax" or "Kimi"
             || (_selVersions.Contains(p.Version) && _selTiers.Contains(p.Tier))) &&
         (string.IsNullOrEmpty(p.BillingCycle) || _selCycles.Contains(p.BillingCycle));
 

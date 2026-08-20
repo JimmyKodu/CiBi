@@ -134,5 +134,10 @@ public sealed class AiPlan
         new() { Id = "mm-ultra", ShortName = "MiniMax Ultra", FullName = "MiniMax Token Plan Ultra",
                 Tier = "Ultra", Version = "—", Region = "MiniMax", Type = PlanType.Subscription,
                 PriceMonthly = 469m, Currency = "CNY", MonthlyQuotaMillions = 7100m },
+
+        // Kimi 月付订阅 — USD，每周额度官方给定（Moderato 28M/周）
+        new() { Id = "kimi-moderato", ShortName = "Kimi Moderato", FullName = "Kimi For Coding Moderato 月付",
+                Tier = "Moderato", Version = "—", Region = "Kimi", Type = PlanType.Subscription, BillingCycle = "月付",
+                PriceMonthly = 19m, Currency = "USD", WeeklyTokensMillions = 28m, TokenMultiplier = 1 },
     ];
 }
