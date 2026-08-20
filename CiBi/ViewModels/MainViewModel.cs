@@ -125,10 +125,11 @@ public sealed class MainViewModel : ViewModelBase
     public ObservableCollection<PlanView> Ranked { get; } = new();
     public ObservableCollection<PlanView> VisiblePlans { get; } = new();
 
-    // 大类筛选（默认只勾选：国内版、按量付费、V3、Lite、月付）
-    private readonly HashSet<string> _selRegions = new() { "国内版", "按量付费" };
+    // 品牌筛选（默认全选；版本 V3、档次全选、周期 月付）
+    private readonly HashSet<string> _selBrands = new() { "GLM", "DeepSeek", "Qwen", "Kimi", "MiniMax" };
     private readonly HashSet<string> _selVersions = new() { "V3" };
-    private readonly HashSet<string> _selTiers = new() { "Lite" };
+    // 档次按品牌分组（键 = 品牌:档次）：GLM=Lite/Pro/Max，MiniMax=Plus/Max/Ultra，Kimi=Moderato
+    private readonly HashSet<string> _selTiers = new() { "GLM:Lite", "GLM:Pro", "GLM:Max", "MiniMax:Plus", "MiniMax:Max", "MiniMax:Ultra", "Kimi:Moderato" };
     private readonly HashSet<string> _selCycles = new() { "月付" };
 
     private static bool Has(HashSet<string> s, string k) => s.Contains(k);
@@ -141,26 +142,29 @@ public sealed class MainViewModel : ViewModelBase
         return true;
     }
 
-    public bool FilterIntl { get => Has(_selRegions, "国际版"); set => Toggle(_selRegions, "国际版", value, nameof(FilterIntl)); }
-    public bool FilterCn { get => Has(_selRegions, "国内版"); set => Toggle(_selRegions, "国内版", value, nameof(FilterCn)); }
-    public bool FilterPayG { get => Has(_selRegions, "按量付费"); set => Toggle(_selRegions, "按量付费", value, nameof(FilterPayG)); }
-    public bool FilterMiniMax { get => Has(_selRegions, "MiniMax"); set => Toggle(_selRegions, "MiniMax", value, nameof(FilterMiniMax)); }
-    public bool FilterKimi { get => Has(_selRegions, "Kimi"); set => Toggle(_selRegions, "Kimi", value, nameof(FilterKimi)); }
+    public bool FilterGlm { get => Has(_selBrands, "GLM"); set => Toggle(_selBrands, "GLM", value, nameof(FilterGlm)); }
+    public bool FilterDeepSeek { get => Has(_selBrands, "DeepSeek"); set => Toggle(_selBrands, "DeepSeek", value, nameof(FilterDeepSeek)); }
+    public bool FilterQwen { get => Has(_selBrands, "Qwen"); set => Toggle(_selBrands, "Qwen", value, nameof(FilterQwen)); }
+    public bool FilterKimi { get => Has(_selBrands, "Kimi"); set => Toggle(_selBrands, "Kimi", value, nameof(FilterKimi)); }
+    public bool FilterMiniMax { get => Has(_selBrands, "MiniMax"); set => Toggle(_selBrands, "MiniMax", value, nameof(FilterMiniMax)); }
     public bool FilterV2 { get => Has(_selVersions, "V2"); set => Toggle(_selVersions, "V2", value, nameof(FilterV2)); }
     public bool FilterV3 { get => Has(_selVersions, "V3"); set => Toggle(_selVersions, "V3", value, nameof(FilterV3)); }
-    public bool FilterLite { get => Has(_selTiers, "Lite"); set => Toggle(_selTiers, "Lite", value, nameof(FilterLite)); }
-    public bool FilterPro { get => Has(_selTiers, "Pro"); set => Toggle(_selTiers, "Pro", value, nameof(FilterPro)); }
-    public bool FilterMax { get => Has(_selTiers, "Max"); set => Toggle(_selTiers, "Max", value, nameof(FilterMax)); }
+    public bool FilterTierGlmLite { get => Has(_selTiers, "GLM:Lite"); set => Toggle(_selTiers, "GLM:Lite", value, nameof(FilterTierGlmLite)); }
+    public bool FilterTierGlmPro { get => Has(_selTiers, "GLM:Pro"); set => Toggle(_selTiers, "GLM:Pro", value, nameof(FilterTierGlmPro)); }
+    public bool FilterTierGlmMax { get => Has(_selTiers, "GLM:Max"); set => Toggle(_selTiers, "GLM:Max", value, nameof(FilterTierGlmMax)); }
+    public bool FilterTierMmPlus { get => Has(_selTiers, "MiniMax:Plus"); set => Toggle(_selTiers, "MiniMax:Plus", value, nameof(FilterTierMmPlus)); }
+    public bool FilterTierMmMax { get => Has(_selTiers, "MiniMax:Max"); set => Toggle(_selTiers, "MiniMax:Max", value, nameof(FilterTierMmMax)); }
+    public bool FilterTierMmUltra { get => Has(_selTiers, "MiniMax:Ultra"); set => Toggle(_selTiers, "MiniMax:Ultra", value, nameof(FilterTierMmUltra)); }
+    public bool FilterTierKimiModerato { get => Has(_selTiers, "Kimi:Moderato"); set => Toggle(_selTiers, "Kimi:Moderato", value, nameof(FilterTierKimiModerato)); }
     public bool FilterYear { get => Has(_selCycles, "年付"); set => Toggle(_selCycles, "年付", value, nameof(FilterYear)); }
     public bool FilterQuarter { get => Has(_selCycles, "季付"); set => Toggle(_selCycles, "季付", value, nameof(FilterQuarter)); }
     public bool FilterMonth { get => Has(_selCycles, "月付"); set => Toggle(_selCycles, "月付", value, nameof(FilterMonth)); }
 
     private bool IsVisible(AiPlan p) =>
-        _selRegions.Contains(p.Region) &&
-        // 版本/档次筛选只针对 GLM 订阅套餐；DeepSeek 的 V4/Flash 是模型版本与档次，
-        // MiniMax 的 Plus/Max/Ultra 与 Kimi 的 Moderato 和 GLM 计费版本(V2/V3)、档次(Lite/Pro/Max)体系无关，均不参与这两组筛选
-        (p.Type == PlanType.PayAsYouGo || p.Region is "MiniMax" or "Kimi"
-            || (_selVersions.Contains(p.Version) && _selTiers.Contains(p.Tier))) &&
+        _selBrands.Contains(p.Brand) &&
+        // 按量付费无版本/档次概念；订阅制按"品牌:档次"筛选（GLM 与 MiniMax 的 Max 各自独立），版本筛选(V2/V3)只针对 GLM
+        (p.Type == PlanType.PayAsYouGo ||
+            (_selTiers.Contains(p.Brand + ":" + p.Tier) && (p.Brand != "GLM" || _selVersions.Contains(p.Version)))) &&
         (string.IsNullOrEmpty(p.BillingCycle) || _selCycles.Contains(p.BillingCycle));
 
     public string ExchangeHint => DisplayCurrency == "CNY"

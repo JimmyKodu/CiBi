@@ -91,28 +91,42 @@
           </StackPanel>
           <WrapPanel Margin="0,4,0,0">
             <StackPanel Margin="0,0,28,8">
-              <TextBlock Text="地区" FontSize="11" Foreground="#9CA3AF" Margin="0,0,0,4"/>
+              <TextBlock Text="品牌" FontSize="11" Foreground="#9CA3AF" Margin="0,0,0,4"/>
               <StackPanel Orientation="Horizontal" Spacing="12">
-                <CheckBox Content="国际版" IsChecked="{Binding FilterIntl}"/>
-                <CheckBox Content="国内版" IsChecked="{Binding FilterCn}"/>
-                <CheckBox Content="按量付费" IsChecked="{Binding FilterPayG}"/>
-                <CheckBox Content="MiniMax" IsChecked="{Binding FilterMiniMax}"/>
+                <CheckBox Content="GLM" IsChecked="{Binding FilterGlm}"/>
+                <CheckBox Content="DeepSeek" IsChecked="{Binding FilterDeepSeek}"/>
+                <CheckBox Content="Qwen" IsChecked="{Binding FilterQwen}"/>
                 <CheckBox Content="Kimi" IsChecked="{Binding FilterKimi}"/>
+                <CheckBox Content="MiniMax" IsChecked="{Binding FilterMiniMax}"/>
               </StackPanel>
             </StackPanel>
-            <StackPanel Margin="0,0,28,8">
-              <TextBlock Text="计费版本" FontSize="11" Foreground="#9CA3AF" Margin="0,0,0,4"/>
+            <StackPanel Margin="0,0,28,8" IsVisible="{Binding FilterGlm}">
+              <TextBlock Text="计费版本 · GLM" FontSize="11" Foreground="#9CA3AF" Margin="0,0,0,4"/>
               <StackPanel Orientation="Horizontal" Spacing="12">
                 <CheckBox Content="V2" IsChecked="{Binding FilterV2}"/>
                 <CheckBox Content="V3" IsChecked="{Binding FilterV3}"/>
               </StackPanel>
             </StackPanel>
-            <StackPanel Margin="0,0,28,8">
-              <TextBlock Text="档次" FontSize="11" Foreground="#9CA3AF" Margin="0,0,0,4"/>
+            <StackPanel Margin="0,0,28,8" IsVisible="{Binding FilterGlm}">
+              <TextBlock Text="档次 · GLM" FontSize="11" Foreground="#9CA3AF" Margin="0,0,0,4"/>
               <StackPanel Orientation="Horizontal" Spacing="12">
-                <CheckBox Content="Lite" IsChecked="{Binding FilterLite}"/>
-                <CheckBox Content="Pro" IsChecked="{Binding FilterPro}"/>
-                <CheckBox Content="Max" IsChecked="{Binding FilterMax}"/>
+                <CheckBox Content="Lite" IsChecked="{Binding FilterTierGlmLite}"/>
+                <CheckBox Content="Pro" IsChecked="{Binding FilterTierGlmPro}"/>
+                <CheckBox Content="Max" IsChecked="{Binding FilterTierGlmMax}"/>
+              </StackPanel>
+            </StackPanel>
+            <StackPanel Margin="0,0,28,8" IsVisible="{Binding FilterMiniMax}">
+              <TextBlock Text="档次 · MiniMax" FontSize="11" Foreground="#9CA3AF" Margin="0,0,0,4"/>
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <CheckBox Content="Plus" IsChecked="{Binding FilterTierMmPlus}"/>
+                <CheckBox Content="Max" IsChecked="{Binding FilterTierMmMax}"/>
+                <CheckBox Content="Ultra" IsChecked="{Binding FilterTierMmUltra}"/>
+              </StackPanel>
+            </StackPanel>
+            <StackPanel Margin="0,0,28,8" IsVisible="{Binding FilterKimi}">
+              <TextBlock Text="档次 · Kimi" FontSize="11" Foreground="#9CA3AF" Margin="0,0,0,4"/>
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <CheckBox Content="Moderato" IsChecked="{Binding FilterTierKimiModerato}"/>
               </StackPanel>
             </StackPanel>
             <StackPanel Margin="0,0,0,8">
