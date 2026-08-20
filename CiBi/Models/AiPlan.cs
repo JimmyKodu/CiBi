@@ -127,18 +127,21 @@ public sealed class AiPlan
 
         // MiniMax Token Plan — 国内 CNY，月付，官方直接给定月配额（Plus 6亿 / Max 18亿 / Ultra 71亿）
         new() { Id = "mm-plus", ShortName = "MiniMax Plus", FullName = "MiniMax Token Plan Plus",
-                Brand = "MiniMax", Tier = "Plus", Version = "—", Region = "MiniMax", Type = PlanType.Subscription,
+                Brand = "MiniMax", Tier = "Plus", Version = "—", Region = "国内版", Type = PlanType.Subscription,
                 PriceMonthly = 49m, Currency = "CNY", MonthlyQuotaMillions = 600m },
         new() { Id = "mm-max", ShortName = "MiniMax Max", FullName = "MiniMax Token Plan Max",
-                Brand = "MiniMax", Tier = "Max", Version = "—", Region = "MiniMax", Type = PlanType.Subscription,
+                Brand = "MiniMax", Tier = "Max", Version = "—", Region = "国内版", Type = PlanType.Subscription,
                 PriceMonthly = 119m, Currency = "CNY", MonthlyQuotaMillions = 1800m },
         new() { Id = "mm-ultra", ShortName = "MiniMax Ultra", FullName = "MiniMax Token Plan Ultra",
-                Brand = "MiniMax", Tier = "Ultra", Version = "—", Region = "MiniMax", Type = PlanType.Subscription,
+                Brand = "MiniMax", Tier = "Ultra", Version = "—", Region = "国内版", Type = PlanType.Subscription,
                 PriceMonthly = 469m, Currency = "CNY", MonthlyQuotaMillions = 7100m },
 
-        // Kimi 月付订阅 — USD，每周额度官方给定（Moderato 28M/周）
-        new() { Id = "kimi-moderato", ShortName = "Kimi Moderato", FullName = "Kimi For Coding Moderato 月付",
-                Brand = "Kimi", Tier = "Moderato", Version = "—", Region = "Kimi", Type = PlanType.Subscription, BillingCycle = "月付",
+        // Kimi For Coding 月付订阅 — 国际 USD / 国内 CNY，每周额度官方给定（Moderato 28M/周）
+        new() { Id = "kimi-moderato-int", ShortName = "Moderato 国际", FullName = "Kimi For Coding Moderato 国际版 月付",
+                Brand = "Kimi", Tier = "Moderato", Version = "—", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "月付",
                 PriceMonthly = 19m, Currency = "USD", WeeklyTokensMillions = 28m, TokenMultiplier = 1 },
+        new() { Id = "kimi-moderato-cn", ShortName = "Moderato 国内", FullName = "Kimi For Coding Moderato 国内版 月付",
+                Brand = "Kimi", Tier = "Moderato", Version = "—", Region = "国内版", Type = PlanType.Subscription, BillingCycle = "月付",
+                PriceMonthly = 99m, Currency = "CNY", WeeklyTokensMillions = 28m, TokenMultiplier = 1 },
     ];
 }

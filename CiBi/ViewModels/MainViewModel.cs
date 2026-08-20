@@ -131,6 +131,8 @@ public sealed class MainViewModel : ViewModelBase
     // 档次按品牌分组（键 = 品牌:档次）：GLM=Lite/Pro/Max，MiniMax=Plus/Max/Ultra，Kimi=Moderato
     private readonly HashSet<string> _selTiers = new() { "GLM:Lite", "GLM:Pro", "GLM:Max", "MiniMax:Plus", "MiniMax:Max", "MiniMax:Ultra", "Kimi:Moderato" };
     private readonly HashSet<string> _selCycles = new() { "月付" };
+    // 地区筛选（只作用于订阅制；按量付费均为国内 CNY，不参与）
+    private readonly HashSet<string> _selRegions = new() { "国际版", "国内版" };
 
     private static bool Has(HashSet<string> s, string k) => s.Contains(k);
     private bool Toggle(HashSet<string> s, string k, bool v, string propName)
@@ -159,12 +161,15 @@ public sealed class MainViewModel : ViewModelBase
     public bool FilterYear { get => Has(_selCycles, "年付"); set => Toggle(_selCycles, "年付", value, nameof(FilterYear)); }
     public bool FilterQuarter { get => Has(_selCycles, "季付"); set => Toggle(_selCycles, "季付", value, nameof(FilterQuarter)); }
     public bool FilterMonth { get => Has(_selCycles, "月付"); set => Toggle(_selCycles, "月付", value, nameof(FilterMonth)); }
+    public bool FilterIntl { get => Has(_selRegions, "国际版"); set => Toggle(_selRegions, "国际版", value, nameof(FilterIntl)); }
+    public bool FilterCn { get => Has(_selRegions, "国内版"); set => Toggle(_selRegions, "国内版", value, nameof(FilterCn)); }
 
     private bool IsVisible(AiPlan p) =>
         _selBrands.Contains(p.Brand) &&
         // 按量付费无版本/档次概念；订阅制按"品牌:档次"筛选（GLM 与 MiniMax 的 Max 各自独立），版本筛选(V2/V3)只针对 GLM
         (p.Type == PlanType.PayAsYouGo ||
             (_selTiers.Contains(p.Brand + ":" + p.Tier) && (p.Brand != "GLM" || _selVersions.Contains(p.Version)))) &&
+        (p.Type == PlanType.PayAsYouGo || _selRegions.Contains(p.Region)) &&
         (string.IsNullOrEmpty(p.BillingCycle) || _selCycles.Contains(p.BillingCycle));
 
     public string ExchangeHint => DisplayCurrency == "CNY"
