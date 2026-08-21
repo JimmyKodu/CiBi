@@ -75,6 +75,16 @@ public sealed class PlanView : ReactiveObject
     private string _outputPriceDisplay = "";
     public string OutputPriceDisplay { get => _outputPriceDisplay; set => this.RaiseAndSetIfChanged(ref _outputPriceDisplay, value); }
 
+    // GLM 订阅制：高峰消耗倍率按使用时段加权后的系数文本（空 = 无高峰影响）
+    private string _peakWeightText = "";
+    public string PeakWeightText
+    {
+        get => _peakWeightText;
+        set { this.RaiseAndSetIfChanged(ref _peakWeightText, value); this.RaisePropertyChanged(nameof(HasPeakWeight)); }
+    }
+
+    public bool HasPeakWeight => !string.IsNullOrEmpty(_peakWeightText);
+
     private int _rank;
     public int Rank
     {

@@ -161,7 +161,7 @@
                   <TextBlock Text="5 款模型" Foreground="White" FontSize="10" FontWeight="SemiBold"/>
                 </Border>
               </StackPanel>
-              <TextBlock Text="拖动滑块调节 token 用量比例，排行动态更新" FontSize="12" Foreground="#6B7280"/>
+              <TextBlock Text="拖动滑块调节 token 用量比例，选择使用时段自动折算各厂商高峰占比" FontSize="12" Foreground="#6B7280"/>
               <TextBlock Text="{Binding MixSummary}" FontSize="12" Foreground="#1428A0" FontWeight="SemiBold" Margin="0,4,0,0" TextWrapping="Wrap"/>
             </StackPanel>
 
@@ -176,13 +176,42 @@
                 <Slider Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding OutputRatio}" MinWidth="200" VerticalAlignment="Center"/>
                 <TextBlock Grid.Column="2" Text="{Binding OutputRatioText}" FontSize="12" FontWeight="SemiBold" Foreground="#1428A0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
               </Grid>
-              <Grid ColumnDefinitions="90,*,48">
-                <TextBlock Grid.Column="0" Text="高峰时段" FontSize="12" Foreground="#374151" VerticalAlignment="Center"/>
-                <Slider Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding PeakRatio}" MinWidth="200" VerticalAlignment="Center"/>
-                <TextBlock Grid.Column="2" Text="{Binding PeakRatioText}" FontSize="12" FontWeight="SemiBold" Foreground="#F59E0B" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+              <Grid ColumnDefinitions="90,Auto,Auto,*">
+                <TextBlock Grid.Column="0" Text="使用时段" FontSize="12" Foreground="#374151" VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="1" ItemsSource="{Binding HourOptions}" SelectedItem="{Binding UseStart, Mode=TwoWay}" Width="88" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="2" Text="~" FontSize="12" Foreground="#6B7280" Margin="8,0,8,0" VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="3" ItemsSource="{Binding HourOptions}" SelectedItem="{Binding UseEnd, Mode=TwoWay}" Width="88" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+              </Grid>
+              <Grid ColumnDefinitions="90,Auto,Auto,Auto,Auto">
+                <TextBlock Grid.Column="0" Text="午休时段" FontSize="12" Foreground="#374151" VerticalAlignment="Center"/>
+                <CheckBox Grid.Column="1" Content="扣除午休" FontSize="12" IsChecked="{Binding HasLunch}" VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="2" ItemsSource="{Binding HourOptions}" SelectedItem="{Binding LunchStart, Mode=TwoWay}" Width="76" Margin="10,0,0,0" VerticalAlignment="Center" IsEnabled="{Binding HasLunch}"/>
+                <TextBlock Grid.Column="3" Text="~" FontSize="12" Foreground="#6B7280" Margin="6,0,6,0" VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="4" ItemsSource="{Binding HourOptions}" SelectedItem="{Binding LunchEnd, Mode=TwoWay}" Width="76" VerticalAlignment="Center" IsEnabled="{Binding HasLunch}"/>
               </Grid>
             </StackPanel>
           </Grid>
+
+          <!-- 每周作息：预设一键切换 + 自由勾选用天（手动勾选即转为自定义） -->
+          <StackPanel Orientation="Horizontal" Spacing="16">
+            <TextBlock Text="每周作息" FontSize="12" Foreground="#374151" VerticalAlignment="Center"/>
+            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+              <RadioButton Content="双休" GroupName="pattern" IsChecked="{Binding PatDouble}" FontSize="12"/>
+              <RadioButton Content="单休" GroupName="pattern" IsChecked="{Binding PatSingle}" FontSize="12"/>
+              <RadioButton Content="大小周" GroupName="pattern" IsChecked="{Binding PatAlt}" FontSize="12"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+              <CheckBox Content="周一" FontSize="12" IsChecked="{Binding UseMon}"/>
+              <CheckBox Content="周二" FontSize="12" IsChecked="{Binding UseTue}"/>
+              <CheckBox Content="周三" FontSize="12" IsChecked="{Binding UseWed}"/>
+              <CheckBox Content="周四" FontSize="12" IsChecked="{Binding UseThu}"/>
+              <CheckBox Content="周五" FontSize="12" IsChecked="{Binding UseFri}"/>
+              <CheckBox Content="周六" FontSize="12" IsChecked="{Binding UseSat}"/>
+              <CheckBox Content="周日" FontSize="12" IsChecked="{Binding UseSun}"/>
+            </StackPanel>
+            <TextBlock Text="{Binding DaysPerWeekText}" FontSize="12" Foreground="#F59E0B" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            <TextBlock Text="GLM 高峰仅计周一至周五；大小周的周六按 0.5 天折算" FontSize="11" Foreground="#9CA3AF" VerticalAlignment="Center"/>
+          </StackPanel>
 
           <!-- 三段比例条：随滑块实时伸缩 -->
           <Border x:Name="MixTrack" Height="18" CornerRadius="9" Background="#EEF2FF" ClipToBounds="True">
@@ -297,6 +326,9 @@
                   <StackPanel Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,18,0">
                     <TextBlock Text="{Binding PerMillionDisplay}" FontSize="19" FontWeight="Bold" Foreground="#1428A0" HorizontalAlignment="Right"/>
                     <TextBlock Text="每 1M Token / 月" FontSize="11" Foreground="#9CA3AF" HorizontalAlignment="Right"/>
+                    <TextBlock IsVisible="{Binding HasPeakWeight}" FontSize="11" Foreground="#F59E0B" HorizontalAlignment="Right" Margin="0,2,0,0">
+                      <Run Text="高峰加权 "/><Run Text="{Binding PeakWeightText}" FontWeight="SemiBold"/>
+                    </TextBlock>
                   </StackPanel>
                   <StackPanel Grid.Column="4" VerticalAlignment="Center" Margin="0,0,4,0">
                     <ProgressBar Value="{Binding ValueScore}" Maximum="1" Height="9" CornerRadius="4" MinWidth="170"
@@ -362,6 +394,10 @@
                             <TextBlock Grid.Column="0" Classes="metricLabel" Text="月配额（估）" VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="1" Classes="metricValue" Text="{Binding MonthlyTokensText}"/>
                           </Grid>
+                          <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasPeakWeight}">
+                            <TextBlock Grid.Column="0" Classes="metricLabel" Text="高峰折算（工作日 14-18）" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Classes="metricValue" Text="{Binding PeakWeightText}" Foreground="#F59E0B"/>
+                          </Grid>
                         </StackPanel>
 
                         <!-- 按量付费明细 -->
@@ -412,7 +448,7 @@
         <StackPanel Spacing="4">
           <TextBlock Text="计算说明" FontWeight="SemiBold" FontSize="13" Foreground="#111827"/>
           <TextBlock FontSize="12" Foreground="#6B7280" TextWrapping="Wrap"
-                     Text="· 订阅制：月配额 = 周配额 × (52 周 ÷ 12 月)，每 1M Token 价格 = 月费 ÷ 月配额；· MiniMax Token Plan：月配额为官方直接给定（Plus 6亿 / Max 18亿 / Ultra 71亿），不折算；· 按量付费（DeepSeek V4 / GLM-5.3 / Qwen3.8-Max / Kimi K3）：以 100M 输入为基准，按上方滑块构成（缓存命中 / 未命中 / 输出）加权计算综合每 1M Token 价格；DeepSeek V4 单价分空闲 / 高峰时段（高峰 = 空闲 ×2）按高峰时段占比线性加权，其余模型不分时段；· 排行按每 1M Token 综合价格从低到高，越低越划算；· 跨币种按上方汇率折算（默认 1 USD ≈ 7.028 CNY）；· 1 亿 token = 100 M token。数据仅供参考，以官方为准。"/>
+                     Text="· 订阅制：月配额 = 周配额 × (52 周 ÷ 12 月)，每 1M Token 价格 = 月费 ÷ 月配额；· GLM Coding Plan：高峰时段为北京时间每周一至周五 14:00-18:00，高峰期 token 消耗按 V2 ×3 / V3 ×2 计入配额，按所选使用时段（勾选扣除午休时先剔除午休窗口）与高峰窗口的重叠占比、每周作息中周一至周五的天数占比折算（大小周的周六按 0.5 天计、不计入高峰）加权到每 1M Token 价格；· MiniMax Token Plan：月配额为官方直接给定（Plus 6亿 / Max 18亿 / Ultra 71亿），不折算；· 按量付费（DeepSeek V4 / GLM-5.3 / Qwen3.8-Max / Kimi K3）：以 100M 输入为基准，按上方滑块构成（缓存命中 / 未命中 / 输出）加权计算综合每 1M Token 价格；DeepSeek V4 高峰时段为北京时间每日 9:00-12:00、14:00-18:00（高峰单价 = 空闲 ×2），按使用时段重叠占比线性加权；GLM-5.3 按量付费不分时段；· 排行按每 1M Token 综合价格从低到高，越低越划算；· 跨币种按上方汇率折算（默认 1 USD ≈ 7.028 CNY）；· 1 亿 token = 100 M token。数据仅供参考，以官方为准。"/>
         </StackPanel>
       </Border>
 

@@ -30,10 +30,15 @@ public sealed class AiPlan
     public decimal CacheMissPrice { get; init; }       // 缓存未命中
     public decimal OutputPrice { get; init; }          // 输出
 
-    // 高峰时段单价（每 1M token；0 表示不分时段）
+    // 高峰时段单价（每 1M token；与空闲同价表示不分时段）
     public decimal CacheHitPricePeak { get; init; }
     public decimal CacheMissPricePeak { get; init; }
     public decimal OutputPricePeak { get; init; }
+
+    // GLM Coding Plan 高峰时段（北京时间每周一至周五 14:00-18:00）token 消耗计入配额的倍率：V2 ×3 / V3 ×2；1 = 不分时段
+    public int PeakMultiplier => Brand == "GLM" && Type == PlanType.Subscription
+        ? (Version == "V2" ? 3 : Version == "V3" ? 2 : 1)
+        : 1;
 
     // 上下文窗口（tokens；0 = 未公布）
     public long ContextWindowTokens { get; init; }
@@ -96,7 +101,7 @@ public sealed class AiPlan
                 Brand = "GLM", Tier = "Max", Version = "V3", Region = "国内版", Type = PlanType.Subscription, BillingCycle = "月付",
                 PriceMonthly = 1078m, Currency = "CNY", WeeklyTokensMillions = 87m * 14, TokenMultiplier = 14 },
 
-        // DeepSeek V4 按量付费（国内，CNY，每 1M token 单价；分空闲/高峰时段，高峰=空闲×2）
+        // DeepSeek V4 按量付费（国内，CNY，每 1M token 单价；高峰=北京时间每日 9:00-12:00、14:00-18:00，单价=空闲×2）
         new() { Id = "dsv4-flash", ShortName = "DeepSeek V4 Flash", FullName = "DeepSeek V4 Flash 按量付费",
                 Brand = "DeepSeek", Tier = "Flash", Version = "V4", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "CNY",
                 CacheHitPrice = 0.05m, CacheHitPricePeak = 0.10m,

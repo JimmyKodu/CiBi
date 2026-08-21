@@ -77,15 +77,144 @@ public sealed class MainViewModel : ViewModelBase
 
     public string OutputRatioText => $"{OutputRatio:0}%";
 
-    // 高峰时段占比（0-100，默认 100=全高峰）；DeepSeek V4 分空闲/高峰两档单价，按此比例线性加权
-    private double _peakRatio = 100d;
-    public double PeakRatio
+    // 使用时段（小时粒度，北京时间）：按各厂商高峰窗口自动折算高峰占比，替代手拖峰谷比例
+    // DeepSeek 高峰 = 每日 9:00-12:00、14:00-18:00；GLM Coding Plan 高峰 = 每周一至周五 14:00-18:00（消耗 V2×3 / V3×2）
+    public IReadOnlyList<string> HourOptions { get; } = Enumerable.Range(0, 25).Select(h => $"{h:00}:00").ToList();
+
+    private string _useStart = "09:00";
+    public string UseStart
     {
-        get => _peakRatio;
-        set { this.RaiseAndSetIfChanged(ref _peakRatio, Math.Clamp(value, 0d, 100d)); this.RaisePropertyChanged(nameof(PeakRatioText)); Recompute(false); }
+        get => _useStart;
+        set { if (string.IsNullOrEmpty(value) || value == _useStart) return; this.RaiseAndSetIfChanged(ref _useStart, value); Recompute(false); }
     }
 
-    public string PeakRatioText => $"{PeakRatio:0}%";
+    private string _useEnd = "18:00";
+    public string UseEnd
+    {
+        get => _useEnd;
+        set { if (string.IsNullOrEmpty(value) || value == _useEnd) return; this.RaiseAndSetIfChanged(ref _useEnd, value); Recompute(false); }
+    }
+
+    // 午休：勾选后从使用时段中扣除 [LunchStart, LunchEnd)，再与各厂商高峰窗口求重叠
+    private bool _hasLunch = true;
+    public bool HasLunch
+    {
+        get => _hasLunch;
+        set { this.RaiseAndSetIfChanged(ref _hasLunch, value); Recompute(false); }
+    }
+
+    private string _lunchStart = "12:00";
+    public string LunchStart
+    {
+        get => _lunchStart;
+        set { if (string.IsNullOrEmpty(value) || value == _lunchStart) return; this.RaiseAndSetIfChanged(ref _lunchStart, value); Recompute(false); }
+    }
+
+    private string _lunchEnd = "14:00";
+    public string LunchEnd
+    {
+        get => _lunchEnd;
+        set { if (string.IsNullOrEmpty(value) || value == _lunchEnd) return; this.RaiseAndSetIfChanged(ref _lunchEnd, value); Recompute(false); }
+    }
+
+    public string UsageSummary => HasLunch
+        ? $"使用时段 {UseStart}~{UseEnd}（扣除午休 {LunchStart}~{LunchEnd}）"
+        : $"使用时段 {UseStart}~{UseEnd}";
+
+    // 所选时段落在各厂商高峰窗口内的占比（0-1）；GLM 高峰仅周一至周五，按每周作息的天数权重占比折算
+    public double DeepSeekPeakShare { get; private set; }
+    public double GlmPeakShare { get; private set; }
+    public string DeepSeekPeakText => $"{DeepSeekPeakShare * 100:0}%";
+    public string GlmPeakText => $"{GlmPeakShare * 100:0}%";
+
+    // 周一..周日每日使用权重；大小周模式周六 = 0.5（隔周使用），未勾选 = 0；默认大小周
+    private readonly double[] _dayWeights = [1, 1, 1, 1, 1, 0.5, 0];
+    private string _workPattern = "大小周";
+
+    public double DaysPerWeek => _dayWeights.Sum();
+    public string DaysPerWeekText => $"每周用 {DaysPerWeek:0.#} 天";
+
+    public bool PatDouble { get => _workPattern == "双休"; set { if (value) ApplyPattern("双休"); } }
+    public bool PatSingle { get => _workPattern == "单休"; set { if (value) ApplyPattern("单休"); } }
+    public bool PatAlt { get => _workPattern == "大小周"; set { if (value) ApplyPattern("大小周"); } }
+
+    public bool UseMon { get => _dayWeights[0] > 0; set => SetDay(0, value); }
+    public bool UseTue { get => _dayWeights[1] > 0; set => SetDay(1, value); }
+    public bool UseWed { get => _dayWeights[2] > 0; set => SetDay(2, value); }
+    public bool UseThu { get => _dayWeights[3] > 0; set => SetDay(3, value); }
+    public bool UseFri { get => _dayWeights[4] > 0; set => SetDay(4, value); }
+    public bool UseSat { get => _dayWeights[5] > 0; set => SetDay(5, value); }
+    public bool UseSun { get => _dayWeights[6] > 0; set => SetDay(6, value); }
+
+    // 预设一键切换；手动勾选/取消任一天则转为"自定义"（三个预设单选全部取消选中）
+    private void ApplyPattern(string p)
+    {
+        if (p == _workPattern) return;
+        _workPattern = p;
+        switch (p)
+        {
+            case "双休": SetWeights(1, 1, 1, 1, 1, 0, 0); break;
+            case "单休": SetWeights(1, 1, 1, 1, 1, 1, 0); break;
+            case "大小周": SetWeights(1, 1, 1, 1, 1, 0.5, 0); break;
+        }
+        RaiseDayProps();
+        Recompute(false);
+    }
+
+    private void SetDay(int i, bool on)
+    {
+        if ((_dayWeights[i] > 0) == on) return;
+        _dayWeights[i] = on ? 1d : 0d;
+        _workPattern = "自定义";
+        RaiseDayProps();
+        Recompute(false);
+    }
+
+    private void SetWeights(params double[] w)
+    {
+        for (var i = 0; i < w.Length && i < _dayWeights.Length; i++) _dayWeights[i] = w[i];
+    }
+
+    private void RaiseDayProps()
+    {
+        foreach (var n in new[]
+        {
+            nameof(UseMon), nameof(UseTue), nameof(UseWed), nameof(UseThu), nameof(UseFri), nameof(UseSat), nameof(UseSun),
+            nameof(PatDouble), nameof(PatSingle), nameof(PatAlt), nameof(DaysPerWeekText)
+        })
+            this.RaisePropertyChanged(n);
+    }
+
+    private static int ParseHour(string t) => int.TryParse(t?[..2], out var h) ? h : 0;
+
+    // 按小时粒度标记每天的实际使用时段（支持跨零点与扣除午休），再统计与各高峰窗口的重叠占比
+    private void UpdatePeakShares()
+    {
+        var s = ParseHour(UseStart);
+        var e = ParseHour(UseEnd);
+        var ls = ParseHour(LunchStart);
+        var le = ParseHour(LunchEnd);
+        double len = 0, ds = 0, glm = 0;
+        for (var h = 0; h < 24; h++)
+        {
+            var inWin = s <= e ? h >= s && h < e : h >= s || h < e;
+            if (!inWin) continue;
+            if (HasLunch && (ls <= le ? h >= ls && h < le : h >= ls || h < le)) continue;
+            len++;
+            if ((h >= 9 && h < 12) || (h >= 14 && h < 18)) ds++;
+            if (h >= 14 && h < 18) glm++;
+        }
+        var total = _dayWeights.Sum();
+        if (len == 0 || total == 0)
+        {
+            DeepSeekPeakShare = GlmPeakShare = 0;
+            return;
+        }
+        DeepSeekPeakShare = ds / len;
+        // GLM 高峰仅周一至周五：按使用天数权重中工作日占比折算（大小周周六 0.5 天不计入高峰）
+        var weekday = _dayWeights.Take(5).Sum();
+        GlmPeakShare = glm / len * (weekday / total);
+    }
 
     // 比例条三段像素宽：视图回填轨道宽度后按占比换算（段间各留 4px 间隙）
     private double _mixTrackWidth = 320d;
@@ -119,7 +248,7 @@ public sealed class MainViewModel : ViewModelBase
     }
 
     public string MixSummary =>
-        $"输入 100M = 缓存命中 {CacheHitRatio:0}M · 缓存未命中 {100 - CacheHitRatio:0}M，输出 {OutputRatio:0}M（综合 {100 + OutputRatio:0}M）；高峰时段占比 {PeakRatio:0}% · 空闲 {100 - PeakRatio:0}%";
+        $"输入 100M = 缓存命中 {CacheHitRatio:0}M · 缓存未命中 {100 - CacheHitRatio:0}M，输出 {OutputRatio:0}M（综合 {100 + OutputRatio:0}M）；{DaysPerWeekText} · {UsageSummary} → DeepSeek 高峰 {DeepSeekPeakText}（9-12、14-18）· GLM 高峰 {GlmPeakText}（工作日 14-18，消耗 V2×3 / V3×2）";
 
     public ObservableCollection<PlanView> Plans { get; } = new();
     public ObservableCollection<PlanView> Ranked { get; } = new();
@@ -188,6 +317,7 @@ public sealed class MainViewModel : ViewModelBase
     // rebuildLists=true: 可见项变化(筛选)时重建排行/详情集合；false: 滑块/汇率/币种变化时仅 Move 重排，避免容器重建卡顿
     private void Recompute(bool rebuildLists)
     {
+        UpdatePeakShares();
         UpdateMetrics();
         if (rebuildLists)
         {
@@ -218,15 +348,18 @@ public sealed class MainViewModel : ViewModelBase
             {
                 var price = Convert(v.OriginalPrice, v.Currency, DisplayCurrency, ExchangeRate);
                 v.PriceDisplay = $"{symbol}{price:#,##0.##}";
-                var perM = v.MonthlyTokensMillions > 0 ? price / v.MonthlyTokensMillions : 0m;
+                // GLM Coding Plan：工作日 14:00-18:00 高峰消耗按 V2×3 / V3×2 计入配额，按使用时段高峰占比折算有效单价
+                var weight = 1m + (v.Plan.PeakMultiplier - 1m) * (decimal)GlmPeakShare;
+                var perM = v.MonthlyTokensMillions > 0 ? price / v.MonthlyTokensMillions * weight : 0m;
                 v.PerMillionValue = perM;
                 v.PerMillionDisplay = perM <= 0 ? "-" : $"{symbol}{perM:#,##0.0000}";
+                v.PeakWeightText = weight > 1.0001m ? $"×{weight:0.00}" : "";
             }
             else
             {
                 // 按量付费：以 100M 输入为基准，按构成比例算综合每 1M 价格（原始币种）；
-                // 单价按高峰时段占比在空闲/高峰两档间线性加权
-                var pk = (decimal)(PeakRatio / 100d);
+                // DeepSeek 单价在空闲/高峰（9-12、14-18，高峰=空闲×2）两档间按时段重叠占比线性加权；其余模型不分时段
+                var pk = (decimal)(v.Plan.Brand == "DeepSeek" ? DeepSeekPeakShare : 0d);
                 decimal Blend(decimal offPeak, decimal peak) => offPeak + (peak - offPeak) * pk;
                 var hitP = Blend(v.CacheHitPrice, v.CacheHitPricePeak);
                 var missP = Blend(v.CacheMissPrice, v.CacheMissPricePeak);
