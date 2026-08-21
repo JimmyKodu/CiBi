@@ -254,14 +254,14 @@ public sealed class MainViewModel : ViewModelBase
     public ObservableCollection<PlanView> Ranked { get; } = new();
     public ObservableCollection<PlanView> VisiblePlans { get; } = new();
 
-    // 品牌筛选（默认全选；版本 V3、周期 月付、地区 国内版）
-    private readonly HashSet<string> _selBrands = new() { "GLM", "DeepSeek", "Qwen", "Kimi", "MiniMax" };
+    // 品牌筛选（默认全选但排除 MiniMax；版本默认仅 V3，周期/地区全选）
+    private readonly HashSet<string> _selBrands = new() { "GLM", "DeepSeek", "Qwen", "Kimi" };
     private readonly HashSet<string> _selVersions = new() { "V3" };
-    // 档次按品牌分组（键 = 品牌:档次）：GLM=Lite/Pro/Max，MiniMax=Plus/Max/Ultra，Kimi=Moderato
-    private readonly HashSet<string> _selTiers = new() { "GLM:Lite", "MiniMax:Plus", "Kimi:Moderato", "Kimi:Allegretto", "Kimi:Allegro" };
-    private readonly HashSet<string> _selCycles = new() { "月付" };
+    // 档次按品牌分组（键 = 品牌:档次）：GLM=Lite/Pro/Max，MiniMax=Plus/Max/Ultra，Kimi=Moderato/Allegretto/Allegro
+    private readonly HashSet<string> _selTiers = new() { "GLM:Lite", "GLM:Pro", "GLM:Max", "Kimi:Moderato", "Kimi:Allegretto", "Kimi:Allegro" };
+    private readonly HashSet<string> _selCycles = new() { "年付", "季付", "月付" };
     // 地区筛选（只作用于订阅制；按量付费均为国内 CNY，不参与）
-    private readonly HashSet<string> _selRegions = new() { "国内版" };
+    private readonly HashSet<string> _selRegions = new() { "国际版", "国内版" };
 
     private static bool Has(HashSet<string> s, string k) => s.Contains(k);
     private bool Toggle(HashSet<string> s, string k, bool v, string propName)
