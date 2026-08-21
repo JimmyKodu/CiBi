@@ -115,7 +115,11 @@
                   <CheckBox Content="Kimi" IsChecked="{Binding FilterKimi}"/>
                   <StackPanel IsVisible="{Binding FilterKimi}" Margin="17,4,0,0" Spacing="3">
                     <TextBlock Text="档次" FontSize="11" Foreground="#9CA3AF"/>
-                    <CheckBox Content="Moderato" IsChecked="{Binding FilterTierKimiModerato}"/>
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                      <CheckBox Content="Moderato" IsChecked="{Binding FilterTierKimiModerato}"/>
+                      <CheckBox Content="Allegretto" IsChecked="{Binding FilterTierKimiAllegretto}"/>
+                      <CheckBox Content="Allegro" IsChecked="{Binding FilterTierKimiAllegro}"/>
+                    </StackPanel>
                   </StackPanel>
                 </StackPanel>
                 <StackPanel>

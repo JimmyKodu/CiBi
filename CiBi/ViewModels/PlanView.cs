@@ -49,14 +49,16 @@ public sealed class PlanView : ReactiveObject
     private static readonly IBrush TierBrushLite = new SolidColorBrush(Color.Parse("#6B7280"));
     private static readonly IBrush TierBrushPro = new SolidColorBrush(Color.Parse("#0EA5E9"));
     private static readonly IBrush TierBrushMax = new SolidColorBrush(Color.Parse("#1428A0"));
-    // MiniMax 档次配色：Plus 琥珀 / Ultra 紫；Kimi Moderato 青，与 GLM 档次视觉区分（Max 落入默认深蓝）
+    // MiniMax 档次配色：Plus 琥珀 / Ultra 紫；Kimi Moderato 青 / Allegretto 靛 / Allegro 玫红，与 GLM 档次视觉区分（Max 落入默认深蓝）
     private static readonly IBrush TierBrushPlus = new SolidColorBrush(Color.Parse("#F59E0B"));
     private static readonly IBrush TierBrushUltra = new SolidColorBrush(Color.Parse("#7C3AED"));
     private static readonly IBrush TierBrushModerato = new SolidColorBrush(Color.Parse("#14B8A6"));
+    private static readonly IBrush TierBrushAllegretto = new SolidColorBrush(Color.Parse("#6366F1"));
+    private static readonly IBrush TierBrushAllegro = new SolidColorBrush(Color.Parse("#E11D48"));
     // 按量付费(DeepSeek)统一绿色系，与 GLM 订阅制档次视觉区分
     public IBrush TierBrush => IsPayAsYouGo
         ? TierBrushPayg
-        : Tier switch { "Lite" => TierBrushLite, "Pro" => TierBrushPro, "Plus" => TierBrushPlus, "Ultra" => TierBrushUltra, "Moderato" => TierBrushModerato, _ => TierBrushMax };
+        : Tier switch { "Lite" => TierBrushLite, "Pro" => TierBrushPro, "Plus" => TierBrushPlus, "Ultra" => TierBrushUltra, "Moderato" => TierBrushModerato, "Allegretto" => TierBrushAllegretto, "Allegro" => TierBrushAllegro, _ => TierBrushMax };
 
     private string _priceDisplay = "";
     public string PriceDisplay { get => _priceDisplay; set => this.RaiseAndSetIfChanged(ref _priceDisplay, value); }

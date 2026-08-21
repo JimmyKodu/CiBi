@@ -141,12 +141,24 @@ public sealed class AiPlan
                 Brand = "MiniMax", Tier = "Ultra", Version = "—", Region = "国内版", Type = PlanType.Subscription,
                 PriceMonthly = 469m, Currency = "CNY", MonthlyQuotaMillions = 7100m },
 
-        // Kimi For Coding 月付订阅 — 国际 USD / 国内 CNY，每周额度官方给定（Moderato 26.8M/周）
+        // Kimi For Coding 月付订阅 — 国际 USD / 国内 CNY，每周额度官方给定（Moderato 26.8M/周；Allegretto / Allegro 为其 5 / 15 倍）
         new() { Id = "kimi-moderato-int", ShortName = "Moderato 国际", FullName = "Kimi For Coding Moderato 国际版 月付",
                 Brand = "Kimi", Tier = "Moderato", Version = "—", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "月付",
                 PriceMonthly = 19m, Currency = "USD", WeeklyTokensMillions = 26.8m, TokenMultiplier = 1 },
         new() { Id = "kimi-moderato-cn", ShortName = "Moderato 国内", FullName = "Kimi For Coding Moderato 国内版 月付",
                 Brand = "Kimi", Tier = "Moderato", Version = "—", Region = "国内版", Type = PlanType.Subscription, BillingCycle = "月付",
                 PriceMonthly = 99m, Currency = "CNY", WeeklyTokensMillions = 26.8m, TokenMultiplier = 1 },
+        new() { Id = "kimi-allegretto-int", ShortName = "Allegretto 国际", FullName = "Kimi For Coding Allegretto 国际版 月付",
+                Brand = "Kimi", Tier = "Allegretto", Version = "—", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "月付",
+                PriceMonthly = 39m, Currency = "USD", WeeklyTokensMillions = 26.8m * 5, TokenMultiplier = 5 },
+        new() { Id = "kimi-allegretto-cn", ShortName = "Allegretto 国内", FullName = "Kimi For Coding Allegretto 国内版 月付",
+                Brand = "Kimi", Tier = "Allegretto", Version = "—", Region = "国内版", Type = PlanType.Subscription, BillingCycle = "月付",
+                PriceMonthly = 199m, Currency = "CNY", WeeklyTokensMillions = 26.8m * 5, TokenMultiplier = 5 },
+        new() { Id = "kimi-allegro-int", ShortName = "Allegro 国际", FullName = "Kimi For Coding Allegro 国际版 月付",
+                Brand = "Kimi", Tier = "Allegro", Version = "—", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "月付",
+                PriceMonthly = 99m, Currency = "USD", WeeklyTokensMillions = 26.8m * 15, TokenMultiplier = 15 },
+        new() { Id = "kimi-allegro-cn", ShortName = "Allegro 国内", FullName = "Kimi For Coding Allegro 国内版 月付",
+                Brand = "Kimi", Tier = "Allegro", Version = "—", Region = "国内版", Type = PlanType.Subscription, BillingCycle = "月付",
+                PriceMonthly = 699m, Currency = "CNY", WeeklyTokensMillions = 26.8m * 15, TokenMultiplier = 15 },
     ];
 }

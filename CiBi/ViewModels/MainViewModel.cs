@@ -258,7 +258,7 @@ public sealed class MainViewModel : ViewModelBase
     private readonly HashSet<string> _selBrands = new() { "GLM", "DeepSeek", "Qwen", "Kimi", "MiniMax" };
     private readonly HashSet<string> _selVersions = new() { "V3" };
     // 档次按品牌分组（键 = 品牌:档次）：GLM=Lite/Pro/Max，MiniMax=Plus/Max/Ultra，Kimi=Moderato
-    private readonly HashSet<string> _selTiers = new() { "GLM:Lite", "MiniMax:Plus", "Kimi:Moderato" };
+    private readonly HashSet<string> _selTiers = new() { "GLM:Lite", "MiniMax:Plus", "Kimi:Moderato", "Kimi:Allegretto", "Kimi:Allegro" };
     private readonly HashSet<string> _selCycles = new() { "月付" };
     // 地区筛选（只作用于订阅制；按量付费均为国内 CNY，不参与）
     private readonly HashSet<string> _selRegions = new() { "国内版" };
@@ -287,6 +287,8 @@ public sealed class MainViewModel : ViewModelBase
     public bool FilterTierMmMax { get => Has(_selTiers, "MiniMax:Max"); set => Toggle(_selTiers, "MiniMax:Max", value, nameof(FilterTierMmMax)); }
     public bool FilterTierMmUltra { get => Has(_selTiers, "MiniMax:Ultra"); set => Toggle(_selTiers, "MiniMax:Ultra", value, nameof(FilterTierMmUltra)); }
     public bool FilterTierKimiModerato { get => Has(_selTiers, "Kimi:Moderato"); set => Toggle(_selTiers, "Kimi:Moderato", value, nameof(FilterTierKimiModerato)); }
+    public bool FilterTierKimiAllegretto { get => Has(_selTiers, "Kimi:Allegretto"); set => Toggle(_selTiers, "Kimi:Allegretto", value, nameof(FilterTierKimiAllegretto)); }
+    public bool FilterTierKimiAllegro { get => Has(_selTiers, "Kimi:Allegro"); set => Toggle(_selTiers, "Kimi:Allegro", value, nameof(FilterTierKimiAllegro)); }
     public bool FilterYear { get => Has(_selCycles, "年付"); set => Toggle(_selCycles, "年付", value, nameof(FilterYear)); }
     public bool FilterQuarter { get => Has(_selCycles, "季付"); set => Toggle(_selCycles, "季付", value, nameof(FilterQuarter)); }
     public bool FilterMonth { get => Has(_selCycles, "月付"); set => Toggle(_selCycles, "月付", value, nameof(FilterMonth)); }
