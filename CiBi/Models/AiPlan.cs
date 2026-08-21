@@ -136,12 +136,12 @@ public sealed class AiPlan
                 Brand = "MiniMax", Tier = "Ultra", Version = "—", Region = "国内版", Type = PlanType.Subscription,
                 PriceMonthly = 469m, Currency = "CNY", MonthlyQuotaMillions = 7100m },
 
-        // Kimi For Coding 月付订阅 — 国际 USD / 国内 CNY，每周额度官方给定（Moderato 17.5M/周）
+        // Kimi For Coding 月付订阅 — 国际 USD / 国内 CNY，每周额度官方给定（Moderato 26.8M/周）
         new() { Id = "kimi-moderato-int", ShortName = "Moderato 国际", FullName = "Kimi For Coding Moderato 国际版 月付",
                 Brand = "Kimi", Tier = "Moderato", Version = "—", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "月付",
-                PriceMonthly = 19m, Currency = "USD", WeeklyTokensMillions = 17.5m, TokenMultiplier = 1 },
+                PriceMonthly = 19m, Currency = "USD", WeeklyTokensMillions = 26.8m, TokenMultiplier = 1 },
         new() { Id = "kimi-moderato-cn", ShortName = "Moderato 国内", FullName = "Kimi For Coding Moderato 国内版 月付",
                 Brand = "Kimi", Tier = "Moderato", Version = "—", Region = "国内版", Type = PlanType.Subscription, BillingCycle = "月付",
-                PriceMonthly = 99m, Currency = "CNY", WeeklyTokensMillions = 17.5m, TokenMultiplier = 1 },
+                PriceMonthly = 99m, Currency = "CNY", WeeklyTokensMillions = 26.8m, TokenMultiplier = 1 },
     ];
 }
