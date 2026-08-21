@@ -50,26 +50,26 @@ public sealed class AiPlan
 
     public static readonly IReadOnlyList<AiPlan> All =
     [
-        // V2 国际版 — base 79.67 M / week
-        new() { Id = "v2-lite-int", ShortName = "Lite 国际 V2", FullName = "GLM Coding Plan Lite 国际版 V2",
-                Brand = "GLM", Tier = "Lite", Version = "V2", Region = "国际版", Type = PlanType.Subscription,
+        // V2 国际版 — base 79.67 M / week；年付订阅（价格已折算为月费）
+        new() { Id = "v2-lite-int", ShortName = "Lite 国际 V2 年付", FullName = "GLM Coding Plan Lite 国际版 V2 年付",
+                Brand = "GLM", Tier = "Lite", Version = "V2", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "年付",
                 PriceMonthly = 12.6m, Currency = "USD", WeeklyTokensMillions = 79.67m, TokenMultiplier = 1 },
-        new() { Id = "v2-pro-int", ShortName = "Pro 国际 V2", FullName = "GLM Coding Plan Pro 国际版 V2",
-                Brand = "GLM", Tier = "Pro", Version = "V2", Region = "国际版", Type = PlanType.Subscription,
+        new() { Id = "v2-pro-int", ShortName = "Pro 国际 V2 年付", FullName = "GLM Coding Plan Pro 国际版 V2 年付",
+                Brand = "GLM", Tier = "Pro", Version = "V2", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "年付",
                 PriceMonthly = 50.4m, Currency = "USD", WeeklyTokensMillions = 79.67m * 5, TokenMultiplier = 5 },
-        new() { Id = "v2-max-int", ShortName = "Max 国际 V2", FullName = "GLM Coding Plan Max 国际版 V2",
-                Brand = "GLM", Tier = "Max", Version = "V2", Region = "国际版", Type = PlanType.Subscription,
+        new() { Id = "v2-max-int", ShortName = "Max 国际 V2 年付", FullName = "GLM Coding Plan Max 国际版 V2 年付",
+                Brand = "GLM", Tier = "Max", Version = "V2", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "年付",
                 PriceMonthly = 112m, Currency = "USD", WeeklyTokensMillions = 79.67m * 20, TokenMultiplier = 20 },
 
-        // V3 国际版 — base 87 M / week
-        new() { Id = "v3-lite-int", ShortName = "Lite 国际 V3", FullName = "GLM Coding Plan Lite 国际版 V3",
-                Brand = "GLM", Tier = "Lite", Version = "V3", Region = "国际版", Type = PlanType.Subscription,
+        // V3 国际版 — base 87 M / week；年付订阅（价格已折算为月费）
+        new() { Id = "v3-lite-int", ShortName = "Lite 国际 V3 年付", FullName = "GLM Coding Plan Lite 国际版 V3 年付",
+                Brand = "GLM", Tier = "Lite", Version = "V3", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "年付",
                 PriceMonthly = 12.6m, Currency = "USD", WeeklyTokensMillions = 87m, TokenMultiplier = 1 },
-        new() { Id = "v3-pro-int", ShortName = "Pro 国际 V3", FullName = "GLM Coding Plan Pro 国际版 V3",
-                Brand = "GLM", Tier = "Pro", Version = "V3", Region = "国际版", Type = PlanType.Subscription,
+        new() { Id = "v3-pro-int", ShortName = "Pro 国际 V3 年付", FullName = "GLM Coding Plan Pro 国际版 V3 年付",
+                Brand = "GLM", Tier = "Pro", Version = "V3", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "年付",
                 PriceMonthly = 56m, Currency = "USD", WeeklyTokensMillions = 87m * 6, TokenMultiplier = 6 },
-        new() { Id = "v3-max-int", ShortName = "Max 国际 V3", FullName = "GLM Coding Plan Max 国际版 V3",
-                Brand = "GLM", Tier = "Max", Version = "V3", Region = "国际版", Type = PlanType.Subscription,
+        new() { Id = "v3-max-int", ShortName = "Max 国际 V3 年付", FullName = "GLM Coding Plan Max 国际版 V3 年付",
+                Brand = "GLM", Tier = "Max", Version = "V3", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "年付",
                 PriceMonthly = 117.6m, Currency = "USD", WeeklyTokensMillions = 87m * 14, TokenMultiplier = 14 },
 
         // V3 国内版 — base 0.87 亿 = 87 M / week；年付=七折 季付=八折 月付=原价
