@@ -144,17 +144,17 @@ public sealed class AiPlan
                 CacheHitPrice = 0.84m, CacheHitPricePeak = 0.84m,
                 CacheMissPrice = 4.2m, CacheMissPricePeak = 4.2m,
                 OutputPrice = 16.8m, OutputPricePeak = 16.8m, ContextWindowTokens = 1_048_576 },
-        // GPT-5.6 Sol 按量付费（USD，不分时段）— 按上下文分两档：≤272K 标准档；>272K 长上下文档（输入 ×2、输出 ×1.5）；官方另有缓存写入价（=输入 ×1.25），本表不建模
+        // GPT-5.6 Sol 按量付费（USD，不分时段）— 按上下文分两档：≤272K 标准档；>272K 长上下文档（输入 ×2、输出 ×1.5）；官方另收缓存写入费（=输入 ×1.25，$5 / $10），本表不建模
         new() { Id = "gpt56-sol-payg-272k", ShortName = "GPT-5.6 Sol ≤272K", FullName = "GPT-5.6 Sol 按量付费（上下文 ≤ 272K）",
                 Brand = "OpenAI", Tier = "Sol ≤272K", Version = "5.6", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "USD",
-                CacheHitPrice = 0.20m, CacheHitPricePeak = 0.20m,
-                CacheMissPrice = 2m, CacheMissPricePeak = 2m,
-                OutputPrice = 10m, OutputPricePeak = 10m },
-        new() { Id = "gpt56-sol-payg-lc", ShortName = "GPT-5.6 Sol >272K", FullName = "GPT-5.6 Sol 按量付费（上下文 > 272K，长上下文）",
-                Brand = "OpenAI", Tier = "Sol >272K", Version = "5.6", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "USD",
                 CacheHitPrice = 0.40m, CacheHitPricePeak = 0.40m,
                 CacheMissPrice = 4m, CacheMissPricePeak = 4m,
-                OutputPrice = 15m, OutputPricePeak = 15m },
+                OutputPrice = 20m, OutputPricePeak = 20m },
+        new() { Id = "gpt56-sol-payg-lc", ShortName = "GPT-5.6 Sol >272K", FullName = "GPT-5.6 Sol 按量付费（上下文 > 272K，长上下文）",
+                Brand = "OpenAI", Tier = "Sol >272K", Version = "5.6", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "USD",
+                CacheHitPrice = 0.80m, CacheHitPricePeak = 0.80m,
+                CacheMissPrice = 8m, CacheMissPricePeak = 8m,
+                OutputPrice = 30m, OutputPricePeak = 30m },
 
         // ChatGPT Plus — 月付 $20；无官方配额，按 Sol（≤272K）API 综合单价 1/20 暴力折算（无国内版，不参与地区/周期筛选）
         new() { Id = "chatgpt-plus", ShortName = "ChatGPT Plus", FullName = "ChatGPT Plus 订阅",
