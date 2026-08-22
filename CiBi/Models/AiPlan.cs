@@ -129,6 +129,17 @@ public sealed class AiPlan
                 CacheHitPrice = 2m, CacheHitPricePeak = 2m,
                 CacheMissPrice = 20m, CacheMissPricePeak = 20m,
                 OutputPrice = 100m, OutputPricePeak = 100m, ContextWindowTokens = 1_048_576 },
+        // MiniMax-M3 按量付费 — 按上下文窗口分两档定价，永久五折（表中单价为折后实付价），不分时段；Tier 兼作筛选键（默认仅一档参与排行）
+        new() { Id = "mm-m3-payg-512k", ShortName = "MiniMax-M3 ≤512K", FullName = "MiniMax-M3 按量付费（上下文 ≤ 512K，永久五折）",
+                Brand = "MiniMax", Tier = "M3 ≤512K", Version = "M3", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "CNY",
+                CacheHitPrice = 0.42m, CacheHitPricePeak = 0.42m,
+                CacheMissPrice = 2.1m, CacheMissPricePeak = 2.1m,
+                OutputPrice = 8.4m, OutputPricePeak = 8.4m, ContextWindowTokens = 524_288 },
+        new() { Id = "mm-m3-payg-1m", ShortName = "MiniMax-M3 1M", FullName = "MiniMax-M3 按量付费（上下文 512K ~ 1M，永久五折）",
+                Brand = "MiniMax", Tier = "M3 1M", Version = "M3", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "CNY",
+                CacheHitPrice = 0.84m, CacheHitPricePeak = 0.84m,
+                CacheMissPrice = 4.2m, CacheMissPricePeak = 4.2m,
+                OutputPrice = 16.8m, OutputPricePeak = 16.8m, ContextWindowTokens = 1_048_576 },
 
         // Qwen Coding Plan 订阅制 — 国内 CNY，每周额度 Lite 7M、Standard 4 倍、Pro 16 倍；季付/年付总价已折算为月费
         new() { Id = "qwen-lite-month", ShortName = "Lite 月付", FullName = "Qwen Coding Plan Lite 国内版 月付",

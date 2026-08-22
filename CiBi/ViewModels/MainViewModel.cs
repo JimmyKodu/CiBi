@@ -257,8 +257,9 @@ public sealed class MainViewModel : ViewModelBase
     // 品牌筛选（默认全选；版本仅 V3，档次各品牌仅保留单一推荐档，订阅制默认国内版 + 年付）
     private readonly HashSet<string> _selBrands = new() { "GLM", "DeepSeek", "Qwen", "Kimi", "MiniMax" };
     private readonly HashSet<string> _selVersions = new() { "V3" };
-    // 档次按品牌分组（键 = 品牌:档次）：GLM=Lite/Pro/Max，Qwen=Lite/Standard/Pro，MiniMax=Plus/Max/Ultra，Kimi=Moderato/Allegretto/Allegro
-    private readonly HashSet<string> _selTiers = new() { "GLM:Max", "Qwen:Pro", "Kimi:Allegretto", "MiniMax:Max" };
+    // 档次按品牌分组（键 = 品牌:档次）：GLM=Lite/Pro/Max，Qwen=Lite/Standard/Pro，MiniMax=Plus/Max/Ultra，Kimi=Moderato/Allegretto/Allegro；
+    // MiniMax-M3 按量付费按上下文分两档（M3 ≤512K / M3 1M），默认仅勾一档，避免占两个排名位
+    private readonly HashSet<string> _selTiers = new() { "GLM:Max", "Qwen:Pro", "Kimi:Allegretto", "MiniMax:Max", "MiniMax:M3 ≤512K" };
     private readonly HashSet<string> _selCycles = new() { "年付" };
     // 地区筛选（只作用于订阅制；按量付费均为国内 CNY，不参与）
     private readonly HashSet<string> _selRegions = new() { "国内版" };
@@ -289,6 +290,8 @@ public sealed class MainViewModel : ViewModelBase
     public bool FilterTierMmPlus { get => Has(_selTiers, "MiniMax:Plus"); set => Toggle(_selTiers, "MiniMax:Plus", value, nameof(FilterTierMmPlus)); }
     public bool FilterTierMmMax { get => Has(_selTiers, "MiniMax:Max"); set => Toggle(_selTiers, "MiniMax:Max", value, nameof(FilterTierMmMax)); }
     public bool FilterTierMmUltra { get => Has(_selTiers, "MiniMax:Ultra"); set => Toggle(_selTiers, "MiniMax:Ultra", value, nameof(FilterTierMmUltra)); }
+    public bool FilterTierMmM3Low { get => Has(_selTiers, "MiniMax:M3 ≤512K"); set => Toggle(_selTiers, "MiniMax:M3 ≤512K", value, nameof(FilterTierMmM3Low)); }
+    public bool FilterTierMmM3High { get => Has(_selTiers, "MiniMax:M3 1M"); set => Toggle(_selTiers, "MiniMax:M3 1M", value, nameof(FilterTierMmM3High)); }
     public bool FilterTierKimiModerato { get => Has(_selTiers, "Kimi:Moderato"); set => Toggle(_selTiers, "Kimi:Moderato", value, nameof(FilterTierKimiModerato)); }
     public bool FilterTierKimiAllegretto { get => Has(_selTiers, "Kimi:Allegretto"); set => Toggle(_selTiers, "Kimi:Allegretto", value, nameof(FilterTierKimiAllegretto)); }
     public bool FilterTierKimiAllegro { get => Has(_selTiers, "Kimi:Allegro"); set => Toggle(_selTiers, "Kimi:Allegro", value, nameof(FilterTierKimiAllegro)); }
@@ -300,15 +303,19 @@ public sealed class MainViewModel : ViewModelBase
 
     private bool IsVisible(AiPlan p) =>
         _selBrands.Contains(p.Brand) &&
-        // 按量付费无版本/档次概念；订阅制按"品牌:档次"筛选（GLM 与 MiniMax 的 Max 各自独立），版本筛选(V2/V3)只针对 GLM
-        (p.Type == PlanType.PayAsYouGo ||
-            (_selTiers.Contains(p.Brand + ":" + p.Tier) && (p.Brand != "GLM" || _selVersions.Contains(p.Version)))) &&
+        // 按量付费无版本/档次概念（MiniMax-M3 例外：两档上下文参与档次筛选，只放行勾选档）；订阅制按"品牌:档次"筛选，版本筛选(V2/V3)只针对 GLM
+        (p.Type == PlanType.PayAsYouGo
+            ? (p.Brand != "MiniMax" || _selTiers.Contains(p.Brand + ":" + p.Tier))
+            : (_selTiers.Contains(p.Brand + ":" + p.Tier) && (p.Brand != "GLM" || _selVersions.Contains(p.Version)))) &&
         (p.Type == PlanType.PayAsYouGo || _selRegions.Contains(p.Region)) &&
         (string.IsNullOrEmpty(p.BillingCycle) || _selCycles.Contains(p.BillingCycle));
 
     public string ExchangeHint => DisplayCurrency == "CNY"
         ? "所有价格已按汇率折算为人民币（¥）"
         : "所有价格已按汇率折算为美元（$）";
+
+    // 按量付费参与计价的模型数（随筛选变化）
+    public string PaygCountText => $"{VisiblePlans.Count(v => v.IsPayAsYouGo)} 款模型";
 
     public MainViewModel()
     {
@@ -337,6 +344,7 @@ public sealed class MainViewModel : ViewModelBase
         }
         ApplyRankProperties();
         this.RaisePropertyChanged(nameof(ExchangeHint));
+        this.RaisePropertyChanged(nameof(PaygCountText));
         this.RaisePropertyChanged(nameof(MixSummary));
     }
 
