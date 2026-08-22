@@ -21,6 +21,7 @@ public sealed class PlanView : ReactiveObject
     public bool IsPayAsYouGo => Plan.Type == PlanType.PayAsYouGo;
     public bool IsSubscription => Plan.Type == PlanType.Subscription;
     public bool IsMonthlyQuota => Plan.MonthlyQuotaMillions > 0;   // 官方直接给定月配额（如 MiniMax）
+    public bool IsAnchored => !string.IsNullOrEmpty(Plan.PaygAnchorId); // 无官方配额，按锚定 API 单价 × 比例折算（如 ChatGPT Plus）
     public int TokenMultiplier => Plan.TokenMultiplier;
     public decimal WeeklyTokensMillions => Plan.WeeklyTokensMillions;
     public decimal MonthlyTokensMillions => Plan.MonthlyTokensMillions;
@@ -36,13 +37,15 @@ public sealed class PlanView : ReactiveObject
 
     public string OriginalPriceText => IsPayAsYouGo ? "—" : $"{CurrencySymbol(Plan.Currency)}{Plan.PriceMonthly:0.##}";
     public string ContextWindowText => Plan.ContextWindowTokens > 0 ? $"{Plan.ContextWindowTokens:#,##0} tokens" : "—";
-    public string WeeklyTokensText => IsPayAsYouGo || IsMonthlyQuota ? "—" : $"{Plan.WeeklyTokensMillions:#,##0.0} M";
-    public string MonthlyTokensText => IsPayAsYouGo ? "不限" : $"{Plan.MonthlyTokensMillions:#,##0.0} M";
+    public string WeeklyTokensText => IsPayAsYouGo || IsMonthlyQuota || IsAnchored ? "—" : $"{Plan.WeeklyTokensMillions:#,##0.0} M";
+    public string MonthlyTokensText => IsPayAsYouGo ? "不限" : IsAnchored ? "—" : $"{Plan.MonthlyTokensMillions:#,##0.0} M";
     public string Subtitle => IsPayAsYouGo
         ? $"{Plan.Version} · 按量付费 · 缓存命中/未命中/输出 单价"
-        : IsMonthlyQuota
-            ? $"{Plan.Region} · 月付 · 月配额 {MonthlyTokensText}"
-            : $"{(Plan.Version == "—" ? "" : Plan.Version + " · ")}{Plan.Region} · {WeeklyTokensText}/周 ×{TokenMultiplier}{(string.IsNullOrEmpty(Plan.BillingCycle) ? "" : " · " + Plan.BillingCycle)}";
+        : IsAnchored
+            ? $"{Plan.Region} · 月付 · 按 Sol API 综合单价 1/20 折算"
+            : IsMonthlyQuota
+                ? $"{Plan.Region} · 月付 · 月配额 {MonthlyTokensText}"
+                : $"{(Plan.Version == "—" ? "" : Plan.Version + " · ")}{Plan.Region} · {WeeklyTokensText}/周 ×{TokenMultiplier}{(string.IsNullOrEmpty(Plan.BillingCycle) ? "" : " · " + Plan.BillingCycle)}";
 
     // 缓存为静态 Brush，避免每次绑定求值都 new SolidColorBrush + Color.Parse（GC 压力）
     private static readonly IBrush TierBrushPayg = new SolidColorBrush(Color.Parse("#10B981"));

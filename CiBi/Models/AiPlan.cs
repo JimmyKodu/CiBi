@@ -25,6 +25,10 @@ public sealed class AiPlan
     // 订阅制但官方直接给定月配额（M）的套餐（如 MiniMax），>0 时优先于周配额折算
     public decimal MonthlyQuotaMillions { get; init; }
 
+    // 订阅制无官方配额时（如 ChatGPT Plus）：每 1M 价格 = 锚定按量付费套餐综合单价 × 比例（0.05 = 1/20），随用量构成滑块联动；空 = 正常按配额折算
+    public string PaygAnchorId { get; init; } = "";
+    public decimal PaygAnchorFraction { get; init; } = 1m;
+
     // 按量付费字段：每 1M token 单价（套餐币种，空闲时段）
     public decimal CacheHitPrice { get; init; }        // 缓存命中
     public decimal CacheMissPrice { get; init; }       // 缓存未命中
@@ -140,6 +144,22 @@ public sealed class AiPlan
                 CacheHitPrice = 0.84m, CacheHitPricePeak = 0.84m,
                 CacheMissPrice = 4.2m, CacheMissPricePeak = 4.2m,
                 OutputPrice = 16.8m, OutputPricePeak = 16.8m, ContextWindowTokens = 1_048_576 },
+        // GPT-5.6 Sol 按量付费（USD，不分时段）— 按上下文分两档：≤272K 标准档；>272K 长上下文档（输入 ×2、输出 ×1.5）；官方另有缓存写入价（=输入 ×1.25），本表不建模
+        new() { Id = "gpt56-sol-payg-272k", ShortName = "GPT-5.6 Sol ≤272K", FullName = "GPT-5.6 Sol 按量付费（上下文 ≤ 272K）",
+                Brand = "OpenAI", Tier = "Sol ≤272K", Version = "5.6", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "USD",
+                CacheHitPrice = 0.20m, CacheHitPricePeak = 0.20m,
+                CacheMissPrice = 2m, CacheMissPricePeak = 2m,
+                OutputPrice = 10m, OutputPricePeak = 10m },
+        new() { Id = "gpt56-sol-payg-lc", ShortName = "GPT-5.6 Sol >272K", FullName = "GPT-5.6 Sol 按量付费（上下文 > 272K，长上下文）",
+                Brand = "OpenAI", Tier = "Sol >272K", Version = "5.6", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "USD",
+                CacheHitPrice = 0.40m, CacheHitPricePeak = 0.40m,
+                CacheMissPrice = 4m, CacheMissPricePeak = 4m,
+                OutputPrice = 15m, OutputPricePeak = 15m },
+
+        // ChatGPT Plus — 月付 $20；无官方配额，按 Sol（≤272K）API 综合单价 1/20 暴力折算（无国内版，不参与地区/周期筛选）
+        new() { Id = "chatgpt-plus", ShortName = "ChatGPT Plus", FullName = "ChatGPT Plus 订阅",
+                Brand = "OpenAI", Tier = "Plus", Version = "—", Region = "国际版", Type = PlanType.Subscription,
+                PriceMonthly = 20m, Currency = "USD", PaygAnchorId = "gpt56-sol-payg-272k", PaygAnchorFraction = 0.05m },
 
         // Qwen Coding Plan 订阅制 — 国内 CNY，每周额度 Lite 7M、Standard 4 倍、Pro 16 倍；季付/年付总价已折算为月费
         new() { Id = "qwen-lite-month", ShortName = "Lite 月付", FullName = "Qwen Coding Plan Lite 国内版 月付",

@@ -255,13 +255,15 @@ public sealed class MainViewModel : ViewModelBase
     public ObservableCollection<PlanView> VisiblePlans { get; } = new();
 
     // 品牌筛选（默认全选；版本仅 V3，档次各品牌仅保留单一推荐档，订阅制默认国内版 + 年付）
-    private readonly HashSet<string> _selBrands = new() { "GLM", "DeepSeek", "Qwen", "Kimi", "MiniMax" };
+    private readonly HashSet<string> _selBrands = new() { "GLM", "DeepSeek", "Qwen", "Kimi", "MiniMax", "OpenAI" };
     private readonly HashSet<string> _selVersions = new() { "V3" };
     // 档次按品牌分组（键 = 品牌:档次）：GLM=Lite/Pro/Max，Qwen=Lite/Standard/Pro，MiniMax=Plus/Max/Ultra，Kimi=Moderato/Allegretto/Allegro；
-    // MiniMax-M3 按量付费按上下文分两档（M3 ≤512K / M3 1M），默认仅勾一档，避免占两个排名位
-    private readonly HashSet<string> _selTiers = new() { "GLM:Max", "Qwen:Pro", "Kimi:Allegretto", "MiniMax:Max", "MiniMax:M3 ≤512K" };
+    // 按量付费按上下文分档的品牌（MiniMax-M3 / GPT-5.6 Sol）默认仅勾一档，避免占两个排名位
+    private readonly HashSet<string> _selTiers = new() { "GLM:Max", "Qwen:Pro", "Kimi:Allegretto", "MiniMax:Max", "MiniMax:M3 ≤512K", "OpenAI:Sol ≤272K", "OpenAI:Plus" };
     private readonly HashSet<string> _selCycles = new() { "年付" };
-    // 地区筛选（只作用于订阅制；按量付费均为国内 CNY，不参与）
+    // 按量付费且按上下文分档定价的品牌：各档参与档次筛选（其余品牌按量付费不受档次/地区/周期筛选）
+    private static readonly HashSet<string> TieredPaygBrands = new() { "MiniMax", "OpenAI" };
+    // 地区筛选（只作用于订阅制；按量付费不参与，GPT-5.6 为 USD 计价）
     private readonly HashSet<string> _selRegions = new() { "国内版" };
 
     private static bool Has(HashSet<string> s, string k) => s.Contains(k);
@@ -279,6 +281,7 @@ public sealed class MainViewModel : ViewModelBase
     public bool FilterQwen { get => Has(_selBrands, "Qwen"); set => Toggle(_selBrands, "Qwen", value, nameof(FilterQwen)); }
     public bool FilterKimi { get => Has(_selBrands, "Kimi"); set => Toggle(_selBrands, "Kimi", value, nameof(FilterKimi)); }
     public bool FilterMiniMax { get => Has(_selBrands, "MiniMax"); set => Toggle(_selBrands, "MiniMax", value, nameof(FilterMiniMax)); }
+    public bool FilterOpenAI { get => Has(_selBrands, "OpenAI"); set => Toggle(_selBrands, "OpenAI", value, nameof(FilterOpenAI)); }
     public bool FilterV2 { get => Has(_selVersions, "V2"); set => Toggle(_selVersions, "V2", value, nameof(FilterV2)); }
     public bool FilterV3 { get => Has(_selVersions, "V3"); set => Toggle(_selVersions, "V3", value, nameof(FilterV3)); }
     public bool FilterTierGlmLite { get => Has(_selTiers, "GLM:Lite"); set => Toggle(_selTiers, "GLM:Lite", value, nameof(FilterTierGlmLite)); }
@@ -292,6 +295,9 @@ public sealed class MainViewModel : ViewModelBase
     public bool FilterTierMmUltra { get => Has(_selTiers, "MiniMax:Ultra"); set => Toggle(_selTiers, "MiniMax:Ultra", value, nameof(FilterTierMmUltra)); }
     public bool FilterTierMmM3Low { get => Has(_selTiers, "MiniMax:M3 ≤512K"); set => Toggle(_selTiers, "MiniMax:M3 ≤512K", value, nameof(FilterTierMmM3Low)); }
     public bool FilterTierMmM3High { get => Has(_selTiers, "MiniMax:M3 1M"); set => Toggle(_selTiers, "MiniMax:M3 1M", value, nameof(FilterTierMmM3High)); }
+    public bool FilterTierGptSolLow { get => Has(_selTiers, "OpenAI:Sol ≤272K"); set => Toggle(_selTiers, "OpenAI:Sol ≤272K", value, nameof(FilterTierGptSolLow)); }
+    public bool FilterTierGptSolHigh { get => Has(_selTiers, "OpenAI:Sol >272K"); set => Toggle(_selTiers, "OpenAI:Sol >272K", value, nameof(FilterTierGptSolHigh)); }
+    public bool FilterTierGptPlus { get => Has(_selTiers, "OpenAI:Plus"); set => Toggle(_selTiers, "OpenAI:Plus", value, nameof(FilterTierGptPlus)); }
     public bool FilterTierKimiModerato { get => Has(_selTiers, "Kimi:Moderato"); set => Toggle(_selTiers, "Kimi:Moderato", value, nameof(FilterTierKimiModerato)); }
     public bool FilterTierKimiAllegretto { get => Has(_selTiers, "Kimi:Allegretto"); set => Toggle(_selTiers, "Kimi:Allegretto", value, nameof(FilterTierKimiAllegretto)); }
     public bool FilterTierKimiAllegro { get => Has(_selTiers, "Kimi:Allegro"); set => Toggle(_selTiers, "Kimi:Allegro", value, nameof(FilterTierKimiAllegro)); }
@@ -303,11 +309,12 @@ public sealed class MainViewModel : ViewModelBase
 
     private bool IsVisible(AiPlan p) =>
         _selBrands.Contains(p.Brand) &&
-        // 按量付费无版本/档次概念（MiniMax-M3 例外：两档上下文参与档次筛选，只放行勾选档）；订阅制按"品牌:档次"筛选，版本筛选(V2/V3)只针对 GLM
+        // 按量付费无版本/档次概念（上下文分档品牌除外：只放行勾选档）；订阅制按"品牌:档次"筛选，版本筛选(V2/V3)只针对 GLM
         (p.Type == PlanType.PayAsYouGo
-            ? (p.Brand != "MiniMax" || _selTiers.Contains(p.Brand + ":" + p.Tier))
+            ? (!TieredPaygBrands.Contains(p.Brand) || _selTiers.Contains(p.Brand + ":" + p.Tier))
             : (_selTiers.Contains(p.Brand + ":" + p.Tier) && (p.Brand != "GLM" || _selVersions.Contains(p.Version)))) &&
-        (p.Type == PlanType.PayAsYouGo || _selRegions.Contains(p.Region)) &&
+        // OpenAI 订阅无国内版，不参与地区筛选
+        (p.Type == PlanType.PayAsYouGo || p.Brand == "OpenAI" || _selRegions.Contains(p.Region)) &&
         (string.IsNullOrEmpty(p.BillingCycle) || _selCycles.Contains(p.BillingCycle));
 
     public string ExchangeHint => DisplayCurrency == "CNY"
@@ -351,22 +358,36 @@ public sealed class MainViewModel : ViewModelBase
     private void UpdateMetrics()
     {
         var symbol = PlanView.CurrencySymbol(DisplayCurrency);
-        var hit = CacheHitRatio;
-        var miss = 100d - hit;
-        var tout = OutputRatio;
-        var total = 100d + tout; // 输入 100M + 输出 outRatio M
         foreach (var v in Plans)
         {
             if (v.IsSubscription)
             {
                 var price = Convert(v.OriginalPrice, v.Currency, DisplayCurrency, ExchangeRate);
                 v.PriceDisplay = $"{symbol}{price:#,##0.##}";
-                // GLM Coding Plan：工作日 14:00-18:00 高峰消耗按 V2×3 / V3×2 计入配额，按使用时段高峰占比折算有效单价
-                var weight = 1m + (v.Plan.PeakMultiplier - 1m) * (decimal)GlmPeakShare;
-                var perM = v.MonthlyTokensMillions > 0 ? price / v.MonthlyTokensMillions * weight : 0m;
-                v.PerMillionValue = perM;
-                v.PerMillionDisplay = perM <= 0 ? "-" : $"{symbol}{perM:#,##0.0000}";
-                v.PeakWeightText = weight > 1.0001m ? $"×{weight:0.00}" : "";
+                if (v.IsAnchored)
+                {
+                    // 无官方配额（ChatGPT Plus）：每 1M 价格 = 锚定按量套餐综合单价 × 比例，随构成滑块联动；
+                    // 锚定对象在同品牌同版本按量套餐中跟随勾选的上下文档位（默认档优先，均未勾选回退默认档）
+                    var anchorDefault = AiPlan.All.First(p => p.Id == v.Plan.PaygAnchorId);
+                    var siblings = AiPlan.All.Where(p => p.Type == PlanType.PayAsYouGo
+                        && p.Brand == anchorDefault.Brand && p.Version == anchorDefault.Version).ToList();
+                    var anchor = siblings.FirstOrDefault(p => p.Id == anchorDefault.Id && IsVisible(p))
+                              ?? siblings.FirstOrDefault(IsVisible)
+                              ?? anchorDefault;
+                    var perM = Convert(PaygPerMLocal(anchor) * v.Plan.PaygAnchorFraction, anchor.Currency, DisplayCurrency, ExchangeRate);
+                    v.PerMillionValue = perM;
+                    v.PerMillionDisplay = perM <= 0 ? "-" : $"{symbol}{perM:#,##0.0000}";
+                    v.PeakWeightText = "";
+                }
+                else
+                {
+                    // GLM Coding Plan：工作日 14:00-18:00 高峰消耗按 V2×3 / V3×2 计入配额，按使用时段高峰占比折算有效单价
+                    var weight = 1m + (v.Plan.PeakMultiplier - 1m) * (decimal)GlmPeakShare;
+                    var perM = v.MonthlyTokensMillions > 0 ? price / v.MonthlyTokensMillions * weight : 0m;
+                    v.PerMillionValue = perM;
+                    v.PerMillionDisplay = perM <= 0 ? "-" : $"{symbol}{perM:#,##0.0000}";
+                    v.PeakWeightText = weight > 1.0001m ? $"×{weight:0.00}" : "";
+                }
             }
             else
             {
@@ -377,9 +398,7 @@ public sealed class MainViewModel : ViewModelBase
                 var hitP = Blend(v.CacheHitPrice, v.CacheHitPricePeak);
                 var missP = Blend(v.CacheMissPrice, v.CacheMissPricePeak);
                 var outP = Blend(v.OutputPrice, v.OutputPricePeak);
-                var costLocal = (decimal)(hit * (double)hitP + miss * (double)missP + tout * (double)outP);
-                var perMLocal = total > 0 ? costLocal / (decimal)total : 0m;
-                var perM = Convert(perMLocal, v.Currency, DisplayCurrency, ExchangeRate);
+                var perM = Convert(PaygPerMLocal(v.Plan), v.Currency, DisplayCurrency, ExchangeRate);
                 v.PerMillionValue = perM;
                 v.PerMillionDisplay = perM <= 0 ? "-" : $"{symbol}{perM:#,##0.0000}";
                 v.PriceDisplay = v.PerMillionDisplay;
@@ -388,6 +407,18 @@ public sealed class MainViewModel : ViewModelBase
                 v.OutputPriceDisplay = $"{symbol}{Convert(outP, v.Currency, DisplayCurrency, ExchangeRate):0.####}";
             }
         }
+    }
+
+    // 按量付费综合每 1M 单价（原始币种）：以 100M 输入为基准按构成（缓存命中 / 未命中 / 输出）加权
+    private decimal PaygPerMLocal(AiPlan p)
+    {
+        var pk = (decimal)(p.Brand == "DeepSeek" ? DeepSeekPeakShare : 0d);
+        decimal Blend(decimal offPeak, decimal peak) => offPeak + (peak - offPeak) * pk;
+        var cost = (double)Blend(p.CacheHitPrice, p.CacheHitPricePeak) * CacheHitRatio
+                 + (double)Blend(p.CacheMissPrice, p.CacheMissPricePeak) * (100d - CacheHitRatio)
+                 + (double)Blend(p.OutputPrice, p.OutputPricePeak) * OutputRatio;
+        var total = 100d + OutputRatio;
+        return total > 0 ? (decimal)(cost / total) : 0m;
     }
 
     // 用 Move 把各项移到排序后的位置，复用现有容器(不触发 DataTemplate 重建)
