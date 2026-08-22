@@ -257,8 +257,8 @@ public sealed class MainViewModel : ViewModelBase
     // 品牌筛选（默认全选但排除 MiniMax；版本默认仅 V3，周期/地区全选）
     private readonly HashSet<string> _selBrands = new() { "GLM", "DeepSeek", "Qwen", "Kimi" };
     private readonly HashSet<string> _selVersions = new() { "V3" };
-    // 档次按品牌分组（键 = 品牌:档次）：GLM=Lite/Pro/Max，MiniMax=Plus/Max/Ultra，Kimi=Moderato/Allegretto/Allegro
-    private readonly HashSet<string> _selTiers = new() { "GLM:Lite", "GLM:Pro", "GLM:Max", "Kimi:Moderato", "Kimi:Allegretto", "Kimi:Allegro" };
+    // 档次按品牌分组（键 = 品牌:档次）：GLM=Lite/Pro/Max，Qwen=Lite/Standard/Pro，MiniMax=Plus/Max/Ultra，Kimi=Moderato/Allegretto/Allegro
+    private readonly HashSet<string> _selTiers = new() { "GLM:Lite", "GLM:Pro", "GLM:Max", "Qwen:Lite", "Qwen:Standard", "Qwen:Pro", "Kimi:Moderato", "Kimi:Allegretto", "Kimi:Allegro" };
     private readonly HashSet<string> _selCycles = new() { "年付", "季付", "月付" };
     // 地区筛选（只作用于订阅制；按量付费均为国内 CNY，不参与）
     private readonly HashSet<string> _selRegions = new() { "国际版", "国内版" };
@@ -283,6 +283,9 @@ public sealed class MainViewModel : ViewModelBase
     public bool FilterTierGlmLite { get => Has(_selTiers, "GLM:Lite"); set => Toggle(_selTiers, "GLM:Lite", value, nameof(FilterTierGlmLite)); }
     public bool FilterTierGlmPro { get => Has(_selTiers, "GLM:Pro"); set => Toggle(_selTiers, "GLM:Pro", value, nameof(FilterTierGlmPro)); }
     public bool FilterTierGlmMax { get => Has(_selTiers, "GLM:Max"); set => Toggle(_selTiers, "GLM:Max", value, nameof(FilterTierGlmMax)); }
+    public bool FilterTierQwenLite { get => Has(_selTiers, "Qwen:Lite"); set => Toggle(_selTiers, "Qwen:Lite", value, nameof(FilterTierQwenLite)); }
+    public bool FilterTierQwenStandard { get => Has(_selTiers, "Qwen:Standard"); set => Toggle(_selTiers, "Qwen:Standard", value, nameof(FilterTierQwenStandard)); }
+    public bool FilterTierQwenPro { get => Has(_selTiers, "Qwen:Pro"); set => Toggle(_selTiers, "Qwen:Pro", value, nameof(FilterTierQwenPro)); }
     public bool FilterTierMmPlus { get => Has(_selTiers, "MiniMax:Plus"); set => Toggle(_selTiers, "MiniMax:Plus", value, nameof(FilterTierMmPlus)); }
     public bool FilterTierMmMax { get => Has(_selTiers, "MiniMax:Max"); set => Toggle(_selTiers, "MiniMax:Max", value, nameof(FilterTierMmMax)); }
     public bool FilterTierMmUltra { get => Has(_selTiers, "MiniMax:Ultra"); set => Toggle(_selTiers, "MiniMax:Ultra", value, nameof(FilterTierMmUltra)); }
