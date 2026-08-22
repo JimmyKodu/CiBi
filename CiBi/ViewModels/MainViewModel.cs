@@ -259,7 +259,7 @@ public sealed class MainViewModel : ViewModelBase
     private readonly HashSet<string> _selVersions = new() { "V3" };
     // 档次按品牌分组（键 = 品牌:档次）：GLM=Lite/Pro/Max，Qwen=Lite/Standard/Pro，MiniMax=Plus/Max/Ultra，Kimi=Moderato/Allegretto/Allegro；
     // 按量付费按上下文分档的品牌（MiniMax-M3 / GPT-5.6 Sol）默认仅勾一档，避免占两个排名位
-    private readonly HashSet<string> _selTiers = new() { "GLM:Max", "Qwen:Pro", "Kimi:Allegretto", "MiniMax:Max", "MiniMax:M3 ≤512K", "OpenAI:Sol ≤272K", "OpenAI:Plus" };
+    private readonly HashSet<string> _selTiers = new() { "GLM:Max", "Qwen:Pro", "Kimi:Allegretto", "MiniMax:Max", "MiniMax:M3 ≤512K", "OpenAI:Sol ≤272K", "OpenAI:Sol >272K", "OpenAI:Plus" };
     private readonly HashSet<string> _selCycles = new() { "年付" };
     // 按量付费且按上下文分档定价的品牌：各档参与档次筛选（其余品牌按量付费不受档次/地区/周期筛选）
     private static readonly HashSet<string> TieredPaygBrands = new() { "MiniMax", "OpenAI" };
@@ -367,14 +367,13 @@ public sealed class MainViewModel : ViewModelBase
                 if (v.IsAnchored)
                 {
                     // 无官方配额（ChatGPT Plus）：每 1M 价格 = 锚定按量套餐综合单价 × 比例，随构成滑块联动；
-                    // 锚定对象在同品牌同版本按量套餐中跟随勾选的上下文档位（默认档优先，均未勾选回退默认档）
+                    // 锚定对象取同品牌同版本按量套餐中当前勾选的档位，多档同勾时取各档综合单价的平均（平衡而非极端），均未勾选回退默认档
                     var anchorDefault = AiPlan.All.First(p => p.Id == v.Plan.PaygAnchorId);
-                    var siblings = AiPlan.All.Where(p => p.Type == PlanType.PayAsYouGo
-                        && p.Brand == anchorDefault.Brand && p.Version == anchorDefault.Version).ToList();
-                    var anchor = siblings.FirstOrDefault(p => p.Id == anchorDefault.Id && IsVisible(p))
-                              ?? siblings.FirstOrDefault(IsVisible)
-                              ?? anchorDefault;
-                    var perM = Convert(PaygPerMLocal(anchor) * v.Plan.PaygAnchorFraction, anchor.Currency, DisplayCurrency, ExchangeRate);
+                    var visible = AiPlan.All.Where(p => p.Type == PlanType.PayAsYouGo
+                        && p.Brand == anchorDefault.Brand && p.Version == anchorDefault.Version && IsVisible(p)).ToList();
+                    if (visible.Count == 0) visible.Add(anchorDefault);
+                    var perMLocal = visible.Average(PaygPerMLocal);
+                    var perM = Convert(perMLocal * v.Plan.PaygAnchorFraction, anchorDefault.Currency, DisplayCurrency, ExchangeRate);
                     v.PerMillionValue = perM;
                     v.PerMillionDisplay = perM <= 0 ? "-" : $"{symbol}{perM:#,##0.0000}";
                     v.PeakWeightText = "";
