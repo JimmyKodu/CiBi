@@ -78,7 +78,7 @@ public sealed class MainViewModel : ViewModelBase
     public string OutputRatioText => $"{OutputRatio:0}%";
 
     // 使用时段（小时粒度，北京时间）：按各厂商高峰窗口自动折算高峰占比，替代手拖峰谷比例
-    // DeepSeek 高峰 = 每日 9:00-12:00、14:00-18:00；GLM Coding Plan 高峰 = 每周一至周五 14:00-18:00（消耗 V2×3 / V3×2）
+    // DeepSeek 高峰 = 工作日 9:00-12:00、14:00-18:00（周末不涨价）；GLM Coding Plan 高峰 = 每周一至周五 14:00-18:00（消耗 V2×3 / V3×2）
     public IReadOnlyList<string> HourOptions { get; } = Enumerable.Range(0, 25).Select(h => $"{h:00}:00").ToList();
 
     private string _useStart = "09:00";
@@ -121,7 +121,7 @@ public sealed class MainViewModel : ViewModelBase
         ? $"使用时段 {UseStart}~{UseEnd}（扣除午休 {LunchStart}~{LunchEnd}）"
         : $"使用时段 {UseStart}~{UseEnd}";
 
-    // 所选时段落在各厂商高峰窗口内的占比（0-1）；GLM 高峰仅周一至周五，按每周作息的天数权重占比折算
+    // 所选时段落在各厂商高峰窗口内的占比（0-1）；高峰仅周一至周五，按每周作息的天数权重占比折算
     public double DeepSeekPeakShare { get; private set; }
     public double GlmPeakShare { get; private set; }
     public string DeepSeekPeakText => $"{DeepSeekPeakShare * 100:0}%";
@@ -210,9 +210,9 @@ public sealed class MainViewModel : ViewModelBase
             DeepSeekPeakShare = GlmPeakShare = 0;
             return;
         }
-        DeepSeekPeakShare = ds / len;
-        // GLM 高峰仅周一至周五：按使用天数权重中工作日占比折算（大小周周六 0.5 天不计入高峰）
+        // DeepSeek / GLM 高峰均仅周一至周五：按使用天数权重中工作日占比折算（大小周周六 0.5 天不计入高峰）
         var weekday = _dayWeights.Take(5).Sum();
+        DeepSeekPeakShare = ds / len * (weekday / total);
         GlmPeakShare = glm / len * (weekday / total);
     }
 
@@ -248,7 +248,7 @@ public sealed class MainViewModel : ViewModelBase
     }
 
     public string MixSummary =>
-        $"输入 100M = 缓存命中 {CacheHitRatio:0}M · 缓存未命中 {100 - CacheHitRatio:0}M，输出 {OutputRatio:0}M（综合 {100 + OutputRatio:0}M）；{DaysPerWeekText} · {UsageSummary} → DeepSeek 高峰 {DeepSeekPeakText}（9-12、14-18）· GLM 高峰 {GlmPeakText}（工作日 14-18，消耗 V2×3 / V3×2）";
+        $"输入 100M = 缓存命中 {CacheHitRatio:0}M · 缓存未命中 {100 - CacheHitRatio:0}M，输出 {OutputRatio:0}M（综合 {100 + OutputRatio:0}M）；{DaysPerWeekText} · {UsageSummary} → DeepSeek 高峰 {DeepSeekPeakText}（工作日 9-12、14-18，周末不涨价）· GLM 高峰 {GlmPeakText}（工作日 14-18，消耗 V2×3 / V3×2）";
 
     public ObservableCollection<PlanView> Plans { get; } = new();
     public ObservableCollection<PlanView> Ranked { get; } = new();

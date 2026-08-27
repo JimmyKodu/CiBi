@@ -105,7 +105,7 @@ public sealed class AiPlan
                 Brand = "GLM", Tier = "Max", Version = "V3", Region = "国内版", Type = PlanType.Subscription, BillingCycle = "月付",
                 PriceMonthly = 1078m, Currency = "CNY", WeeklyTokensMillions = 87m * 14, TokenMultiplier = 14 },
 
-        // DeepSeek V4 按量付费（国内，CNY，每 1M token 单价；高峰=北京时间每日 9:00-12:00、14:00-18:00，单价=空闲×2）
+        // DeepSeek V4 按量付费（国内，CNY，每 1M token 单价；高峰=北京时间工作日 9:00-12:00、14:00-18:00，周末不涨价，单价=空闲×2）
         new() { Id = "dsv4-flash", ShortName = "DeepSeek V4 Flash", FullName = "DeepSeek V4 Flash 按量付费",
                 Brand = "DeepSeek", Tier = "Flash", Version = "V4", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "CNY",
                 CacheHitPrice = 0.05m, CacheHitPricePeak = 0.10m,
