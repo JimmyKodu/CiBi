@@ -195,16 +195,16 @@ public sealed class AiPlan
                 Brand = "Qwen", Tier = "Pro", Version = "—", Region = "国内版", Type = PlanType.Subscription, BillingCycle = "年付",
                 PriceMonthly = 5600m / 12m, Currency = "CNY", WeeklyTokensMillions = 7m * 16, TokenMultiplier = 16 },
 
-        // MiniMax Token Plan — 国内 CNY，月付，官方直接给定月配额（Plus 6亿 / Max 18亿 / Ultra 71亿）
+        // MiniMax Token Plan — 国内 CNY，月付；官方标称月配额 Plus 6亿 / Max 18亿 / Ultra 71亿，实测约 3 倍，按实测计算
         new() { Id = "mm-plus", ShortName = "MiniMax Plus", FullName = "MiniMax Token Plan Plus",
                 Brand = "MiniMax", Tier = "Plus", Version = "—", Region = "国内版", Type = PlanType.Subscription,
-                PriceMonthly = 49m, Currency = "CNY", MonthlyQuotaMillions = 600m },
+                PriceMonthly = 49m, Currency = "CNY", MonthlyQuotaMillions = 1800m },
         new() { Id = "mm-max", ShortName = "MiniMax Max", FullName = "MiniMax Token Plan Max",
                 Brand = "MiniMax", Tier = "Max", Version = "—", Region = "国内版", Type = PlanType.Subscription,
-                PriceMonthly = 119m, Currency = "CNY", MonthlyQuotaMillions = 1800m },
+                PriceMonthly = 119m, Currency = "CNY", MonthlyQuotaMillions = 5400m },
         new() { Id = "mm-ultra", ShortName = "MiniMax Ultra", FullName = "MiniMax Token Plan Ultra",
                 Brand = "MiniMax", Tier = "Ultra", Version = "—", Region = "国内版", Type = PlanType.Subscription,
-                PriceMonthly = 469m, Currency = "CNY", MonthlyQuotaMillions = 7100m },
+                PriceMonthly = 469m, Currency = "CNY", MonthlyQuotaMillions = 21300m },
 
         // Kimi For Coding 月付订阅 — 国际 USD / 国内 CNY，每周额度官方给定（Moderato 26.8M/周；Allegretto / Allegro 为其 5 / 15 倍）
         new() { Id = "kimi-moderato-int", ShortName = "Moderato 国际", FullName = "Kimi For Coding Moderato 国际版 月付",
