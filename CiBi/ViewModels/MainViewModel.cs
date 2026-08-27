@@ -380,12 +380,14 @@ public sealed class MainViewModel : ViewModelBase
                 }
                 else
                 {
-                    // GLM Coding Plan：工作日 14:00-18:00 高峰消耗按 V2×3 / V3×2 计入配额，按使用时段高峰占比折算有效单价
+                    // GLM Coding Plan：工作日 14:00-18:00 高峰消耗按 V2×3 / V3×2 计入配额，按使用时段高峰占比折算有效单价；
+                    // 按模型消耗速率（GLM-5.3 = 1x / GLM-5.3-Flash 闲时 0.4x）同乘
                     var weight = 1m + (v.Plan.PeakMultiplier - 1m) * (decimal)GlmPeakShare;
-                    var perM = v.MonthlyTokensMillions > 0 ? price / v.MonthlyTokensMillions * weight : 0m;
+                    var eff = v.Plan.QuotaBurnRate * weight;
+                    var perM = v.MonthlyTokensMillions > 0 ? price / v.MonthlyTokensMillions * eff : 0m;
                     v.PerMillionValue = perM;
                     v.PerMillionDisplay = perM <= 0 ? "-" : $"{symbol}{perM:#,##0.0000}";
-                    v.PeakWeightText = weight > 1.0001m ? $"×{weight:0.00}" : "";
+                    v.PeakWeightText = Math.Abs(eff - 1m) > 0.0001m ? $"×{eff:0.00}" : "";
                 }
             }
             else
