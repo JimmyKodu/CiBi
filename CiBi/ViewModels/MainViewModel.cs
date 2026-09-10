@@ -258,12 +258,12 @@ public sealed class MainViewModel : ViewModelBase
     private readonly HashSet<string> _selBrands = new() { "GLM", "DeepSeek", "Qwen", "Kimi", "MiniMax", "OpenAI" };
     private readonly HashSet<string> _selVersions = new() { "V3" };
     // 档次按品牌分组（键 = 品牌:档次）：GLM=Lite/Pro/Max，Qwen=Lite/Standard/Pro，MiniMax=Plus/Max/Ultra，Kimi=Moderato/Allegretto/Allegro；
-    // 按量付费按上下文分档的品牌（MiniMax-M3 / GPT-5.6 Sol）默认仅勾一档，避免占两个排名位
-    private readonly HashSet<string> _selTiers = new() { "GLM:Max", "Qwen:Pro", "Kimi:Allegretto", "MiniMax:Max", "MiniMax:M3 ≤512K", "OpenAI:Sol ≤272K", "OpenAI:Sol >272K", "OpenAI:Plus" };
+    // 按量付费按上下文分档的品牌（MiniMax-M3 / GPT-6 Astra）默认仅勾一档，避免占两个排名位
+    private readonly HashSet<string> _selTiers = new() { "GLM:Max", "Qwen:Pro", "Kimi:Allegretto", "MiniMax:Max", "MiniMax:M3 ≤512K", "OpenAI:Astra ≤272K", "OpenAI:Astra >272K", "OpenAI:Plus" };
     private readonly HashSet<string> _selCycles = new() { "年付" };
     // 按量付费且按上下文分档定价的品牌：各档参与档次筛选（其余品牌按量付费不受档次/地区/周期筛选）
     private static readonly HashSet<string> TieredPaygBrands = new() { "MiniMax", "OpenAI" };
-    // 地区筛选（只作用于订阅制；按量付费不参与，GPT-5.6 为 USD 计价）
+    // 地区筛选（只作用于订阅制；按量付费不参与，GPT-6 为 USD 计价）
     private readonly HashSet<string> _selRegions = new() { "国内版" };
 
     private static bool Has(HashSet<string> s, string k) => s.Contains(k);
@@ -295,8 +295,8 @@ public sealed class MainViewModel : ViewModelBase
     public bool FilterTierMmUltra { get => Has(_selTiers, "MiniMax:Ultra"); set => Toggle(_selTiers, "MiniMax:Ultra", value, nameof(FilterTierMmUltra)); }
     public bool FilterTierMmM3Low { get => Has(_selTiers, "MiniMax:M3 ≤512K"); set => Toggle(_selTiers, "MiniMax:M3 ≤512K", value, nameof(FilterTierMmM3Low)); }
     public bool FilterTierMmM3High { get => Has(_selTiers, "MiniMax:M3 1M"); set => Toggle(_selTiers, "MiniMax:M3 1M", value, nameof(FilterTierMmM3High)); }
-    public bool FilterTierGptSolLow { get => Has(_selTiers, "OpenAI:Sol ≤272K"); set => Toggle(_selTiers, "OpenAI:Sol ≤272K", value, nameof(FilterTierGptSolLow)); }
-    public bool FilterTierGptSolHigh { get => Has(_selTiers, "OpenAI:Sol >272K"); set => Toggle(_selTiers, "OpenAI:Sol >272K", value, nameof(FilterTierGptSolHigh)); }
+    public bool FilterTierGptAstraLow { get => Has(_selTiers, "OpenAI:Astra ≤272K"); set => Toggle(_selTiers, "OpenAI:Astra ≤272K", value, nameof(FilterTierGptAstraLow)); }
+    public bool FilterTierGptAstraHigh { get => Has(_selTiers, "OpenAI:Astra >272K"); set => Toggle(_selTiers, "OpenAI:Astra >272K", value, nameof(FilterTierGptAstraHigh)); }
     public bool FilterTierGptPlus { get => Has(_selTiers, "OpenAI:Plus"); set => Toggle(_selTiers, "OpenAI:Plus", value, nameof(FilterTierGptPlus)); }
     public bool FilterTierKimiModerato { get => Has(_selTiers, "Kimi:Moderato"); set => Toggle(_selTiers, "Kimi:Moderato", value, nameof(FilterTierKimiModerato)); }
     public bool FilterTierKimiAllegretto { get => Has(_selTiers, "Kimi:Allegretto"); set => Toggle(_selTiers, "Kimi:Allegretto", value, nameof(FilterTierKimiAllegretto)); }

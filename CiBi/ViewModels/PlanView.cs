@@ -42,7 +42,7 @@ public sealed class PlanView : ReactiveObject
     public string Subtitle => IsPayAsYouGo
         ? $"{Plan.Version} · 按量付费 · 缓存命中/未命中/输出 单价"
         : IsAnchored
-            ? $"{Plan.Region} · 月付 · 按 Sol API 综合单价 1/20 折算"
+            ? $"{Plan.Region} · 月付 · 按 Astra API 综合单价 1/20 折算"
             : IsMonthlyQuota
                 ? $"{Plan.Region} · 月付 · 月配额 {MonthlyTokensText}"
                 : $"{(Plan.Version == "—" ? "" : Plan.Version + " · ")}{Plan.Region} · {WeeklyTokensText}/周 ×{TokenMultiplier}{(string.IsNullOrEmpty(Plan.BillingCycle) ? "" : " · " + Plan.BillingCycle)}";
