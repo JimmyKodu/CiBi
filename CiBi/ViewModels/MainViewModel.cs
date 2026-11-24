@@ -78,7 +78,7 @@ public sealed class MainViewModel : ViewModelBase
     public string OutputRatioText => $"{OutputRatio:0}%";
 
     // 使用时段（小时粒度，北京时间）：按各厂商高峰窗口自动折算高峰占比，替代手拖峰谷比例
-    // DeepSeek 高峰 = 工作日 9:00-12:00、14:00-18:00（周末不涨价）；GLM Coding Plan 高峰 = 每周一至周五 14:00-18:00（消耗 V2×3 / V3×2）
+    // DeepSeek 高峰 = 工作日 9:00-12:00、14:00-18:00（周末不涨价）；GLM Coding Plan 高峰 = 每周一至周五 14:00-18:00（消耗 ×2）
     public IReadOnlyList<string> HourOptions { get; } = Enumerable.Range(0, 25).Select(h => $"{h:00}:00").ToList();
 
     private string _useStart = "09:00";
@@ -248,7 +248,7 @@ public sealed class MainViewModel : ViewModelBase
     }
 
     public string MixSummary =>
-        $"输入 100M = 缓存命中 {CacheHitRatio:0}M · 缓存未命中 {100 - CacheHitRatio:0}M，输出 {OutputRatio:0}M（综合 {100 + OutputRatio:0}M）；{DaysPerWeekText} · {UsageSummary} → DeepSeek 高峰 {DeepSeekPeakText}（工作日 9-12、14-18，周末不涨价）· GLM 高峰 {GlmPeakText}（工作日 14-18，消耗 V2×3 / V3×2）";
+        $"输入 100M = 缓存命中 {CacheHitRatio:0}M · 缓存未命中 {100 - CacheHitRatio:0}M，输出 {OutputRatio:0}M（综合 {100 + OutputRatio:0}M）；{DaysPerWeekText} · {UsageSummary} → DeepSeek 高峰 {DeepSeekPeakText}（工作日 9-12、14-18，周末不涨价）· GLM 高峰 {GlmPeakText}（工作日 14-18，消耗 ×2）";
 
     public ObservableCollection<PlanView> Plans { get; } = new();
     public ObservableCollection<PlanView> Ranked { get; } = new();
@@ -282,7 +282,6 @@ public sealed class MainViewModel : ViewModelBase
     public bool FilterKimi { get => Has(_selBrands, "Kimi"); set => Toggle(_selBrands, "Kimi", value, nameof(FilterKimi)); }
     public bool FilterMiniMax { get => Has(_selBrands, "MiniMax"); set => Toggle(_selBrands, "MiniMax", value, nameof(FilterMiniMax)); }
     public bool FilterOpenAI { get => Has(_selBrands, "OpenAI"); set => Toggle(_selBrands, "OpenAI", value, nameof(FilterOpenAI)); }
-    public bool FilterV2 { get => Has(_selVersions, "V2"); set => Toggle(_selVersions, "V2", value, nameof(FilterV2)); }
     public bool FilterV3 { get => Has(_selVersions, "V3"); set => Toggle(_selVersions, "V3", value, nameof(FilterV3)); }
     public bool FilterTierGlmLite { get => Has(_selTiers, "GLM:Lite"); set => Toggle(_selTiers, "GLM:Lite", value, nameof(FilterTierGlmLite)); }
     public bool FilterTierGlmPro { get => Has(_selTiers, "GLM:Pro"); set => Toggle(_selTiers, "GLM:Pro", value, nameof(FilterTierGlmPro)); }
@@ -309,7 +308,7 @@ public sealed class MainViewModel : ViewModelBase
 
     private bool IsVisible(AiPlan p) =>
         _selBrands.Contains(p.Brand) &&
-        // 按量付费无版本/档次概念（上下文分档品牌除外：只放行勾选档）；订阅制按"品牌:档次"筛选，版本筛选(V2/V3)只针对 GLM
+        // 按量付费无版本/档次概念（上下文分档品牌除外：只放行勾选档）；订阅制按"品牌:档次"筛选，版本筛选(V3)只针对 GLM
         (p.Type == PlanType.PayAsYouGo
             ? (!TieredPaygBrands.Contains(p.Brand) || _selTiers.Contains(p.Brand + ":" + p.Tier))
             : (_selTiers.Contains(p.Brand + ":" + p.Tier) && (p.Brand != "GLM" || _selVersions.Contains(p.Version)))) &&
@@ -380,8 +379,8 @@ public sealed class MainViewModel : ViewModelBase
                 }
                 else
                 {
-                    // GLM Coding Plan：工作日 14:00-18:00 高峰消耗按 V2×3 / V3×2 计入配额，按使用时段高峰占比折算有效单价；
-                    // 按模型消耗速率（GLM-5.3 = 1x / GLM-5.3-Flash 闲时 0.4x）同乘
+                    // GLM Coding Plan：工作日 14:00-18:00 高峰消耗按 ×2 计入配额，按使用时段高峰占比折算有效单价；
+                    // 额度按模型分列（GLM-5.4 / GLM-5.3-Flash 各自定额），均按 1x 消耗同乘
                     var weight = 1m + (v.Plan.PeakMultiplier - 1m) * (decimal)GlmPeakShare;
                     var eff = v.Plan.QuotaBurnRate * weight;
                     var perM = v.MonthlyTokensMillions > 0 ? price / v.MonthlyTokensMillions * eff : 0m;
