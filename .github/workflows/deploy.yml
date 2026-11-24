@@ -26,8 +26,9 @@ jobs:
           dotnet-version: '10.0.x'
 
       # WasmBuildNative=true requires the wasm toolchain (emscripten) to link SkiaSharp/HarfBuzzSharp
-      - name: Install wasm-tools workload
-        run: dotnet workload install wasm-tools
+      # 按 SDK 自动配套：SDK 11 下 net10.0 目标需要 wasm-tools-net10（固定 install wasm-tools 会装错 band 报 NETSDK1147）
+      - name: Install wasm workload
+        run: dotnet workload restore CiBi.Browser
 
       - name: Publish
         run: dotnet publish CiBi.Browser -c Release -o publish
