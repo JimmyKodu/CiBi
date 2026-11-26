@@ -257,12 +257,10 @@ public sealed class MainViewModel : ViewModelBase
     // 品牌筛选（默认全选；版本仅 V3，档次各品牌仅保留单一推荐档，订阅制默认国内版 + 年付）
     private readonly HashSet<string> _selBrands = new() { "GLM", "DeepSeek", "Qwen", "Kimi", "MiniMax", "OpenAI" };
     private readonly HashSet<string> _selVersions = new() { "V3" };
-    // 档次按品牌分组（键 = 品牌:档次）：GLM=Lite/Pro/Max，MiniMax=Plus/Max/Ultra，Kimi=Moderato/Allegretto/Allegro；
-    // 按量付费按上下文分档的品牌（GPT-6 Astra）默认仅勾一档，避免占两个排名位；MiniMax 按量付费仅一档，随品牌显示，同 GLM
-    private readonly HashSet<string> _selTiers = new() { "GLM:Max", "Kimi:Allegretto", "MiniMax:Max", "OpenAI:Astra ≤272K", "OpenAI:Astra >272K", "OpenAI:Plus" };
+    // 档次按品牌分组（键 = 品牌:档次）：GLM=Lite/Pro/Max，MiniMax=Plus/Max/Ultra，Kimi=Moderato/Allegretto/Allegro，OpenAI=Plus(ChatGPT)；
+    // 按量付费各模型均无档次概念（不再有按上下文分档的按量模型），随品牌复选框一并显示
+    private readonly HashSet<string> _selTiers = new() { "GLM:Max", "Kimi:Allegretto", "MiniMax:Max", "OpenAI:Plus" };
     private readonly HashSet<string> _selCycles = new() { "年付" };
-    // 按量付费且按上下文分档定价的品牌：各档参与档次筛选（其余品牌按量付费不受档次/周期筛选，随品牌复选框一并显示）
-    private static readonly HashSet<string> TieredPaygBrands = new() { "OpenAI" };
 
     private static bool Has(HashSet<string> s, string k) => s.Contains(k);
     private bool Toggle(HashSet<string> s, string k, bool v, string propName)
@@ -287,8 +285,6 @@ public sealed class MainViewModel : ViewModelBase
     public bool FilterTierMmPlus { get => Has(_selTiers, "MiniMax:Plus"); set => Toggle(_selTiers, "MiniMax:Plus", value, nameof(FilterTierMmPlus)); }
     public bool FilterTierMmMax { get => Has(_selTiers, "MiniMax:Max"); set => Toggle(_selTiers, "MiniMax:Max", value, nameof(FilterTierMmMax)); }
     public bool FilterTierMmUltra { get => Has(_selTiers, "MiniMax:Ultra"); set => Toggle(_selTiers, "MiniMax:Ultra", value, nameof(FilterTierMmUltra)); }
-    public bool FilterTierGptAstraLow { get => Has(_selTiers, "OpenAI:Astra ≤272K"); set => Toggle(_selTiers, "OpenAI:Astra ≤272K", value, nameof(FilterTierGptAstraLow)); }
-    public bool FilterTierGptAstraHigh { get => Has(_selTiers, "OpenAI:Astra >272K"); set => Toggle(_selTiers, "OpenAI:Astra >272K", value, nameof(FilterTierGptAstraHigh)); }
     public bool FilterTierGptPlus { get => Has(_selTiers, "OpenAI:Plus"); set => Toggle(_selTiers, "OpenAI:Plus", value, nameof(FilterTierGptPlus)); }
     public bool FilterTierKimiModerato { get => Has(_selTiers, "Kimi:Moderato"); set => Toggle(_selTiers, "Kimi:Moderato", value, nameof(FilterTierKimiModerato)); }
     public bool FilterTierKimiAllegretto { get => Has(_selTiers, "Kimi:Allegretto"); set => Toggle(_selTiers, "Kimi:Allegretto", value, nameof(FilterTierKimiAllegretto)); }
@@ -299,10 +295,9 @@ public sealed class MainViewModel : ViewModelBase
 
     private bool IsVisible(AiPlan p) =>
         _selBrands.Contains(p.Brand) &&
-        // 按量付费无版本/档次概念（上下文分档品牌除外：只放行勾选档）；订阅制按"品牌:档次"筛选，版本筛选(V3)只针对 GLM
+        // 按量付费无版本/档次概念（随品牌复选框一并显示，不参与档次/周期筛选）；订阅制按"品牌:档次"筛选，版本筛选(V3)只针对 GLM
         (p.Type == PlanType.PayAsYouGo
-            ? (!TieredPaygBrands.Contains(p.Brand) || _selTiers.Contains(p.Brand + ":" + p.Tier))
-            : (_selTiers.Contains(p.Brand + ":" + p.Tier) && (p.Brand != "GLM" || _selVersions.Contains(p.Version)))) &&
+            || (_selTiers.Contains(p.Brand + ":" + p.Tier) && (p.Brand != "GLM" || _selVersions.Contains(p.Version)))) &&
         (string.IsNullOrEmpty(p.BillingCycle) || _selCycles.Contains(p.BillingCycle));
 
     public string ExchangeHint => DisplayCurrency == "CNY"

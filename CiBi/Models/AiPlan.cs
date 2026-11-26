@@ -190,22 +190,18 @@ public sealed class AiPlan
                 CacheHitPrice = 0.10m, CacheHitPricePeak = 0.10m,
                 CacheMissPrice = 1m, CacheMissPricePeak = 1m,
                 OutputPrice = 4m, OutputPricePeak = 4m, ContextWindowTokens = 1_048_576 },
-        // GPT-6 Astra 按量付费（USD，不分时段）— 按上下文分两档：≤272K 标准档；>272K 长上下文档（输入 ×2、输出 ×1.5）；官方另收缓存写入费（=输入 ×1.25，$12.5 / $25），本表不建模
-        new() { Id = "gpt6-astra-payg-272k", ShortName = "GPT-6 Astra ≤272K", FullName = "GPT-6 Astra 按量付费（上下文 ≤ 272K）",
-                Brand = "OpenAI", Tier = "Astra ≤272K", Version = "6", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "USD",
-                CacheHitPrice = 1m, CacheHitPricePeak = 1m,
-                CacheMissPrice = 10m, CacheMissPricePeak = 10m,
-                OutputPrice = 50m, OutputPricePeak = 50m },
-        new() { Id = "gpt6-astra-payg-lc", ShortName = "GPT-6 Astra >272K", FullName = "GPT-6 Astra 按量付费（上下文 > 272K，长上下文）",
-                Brand = "OpenAI", Tier = "Astra >272K", Version = "6", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "USD",
-                CacheHitPrice = 2m, CacheHitPricePeak = 2m,
-                CacheMissPrice = 20m, CacheMissPricePeak = 20m,
-                OutputPrice = 75m, OutputPricePeak = 75m },
+        // GPT-6.2 Astra 按量付费（USD，不分时段）— 普通输入 $8 / 缓存读取（命中）$0.4 / 输出（含推理 token）$40（每 1M token）；取代原 GPT-6 Astra 上下文档分档
+        // 按量付费不单独设档次筛选（同 GLM / MiniMax），随品牌复选框一并显示；Tier 仅用于卡片标题展示
+        new() { Id = "gpt6-2-astra-payg", ShortName = "GPT-6.2 Astra", FullName = "GPT-6.2 Astra 按量付费",
+                Brand = "OpenAI", Tier = "Astra", Version = "6.2", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "USD",
+                CacheHitPrice = 0.40m, CacheHitPricePeak = 0.40m,
+                CacheMissPrice = 8m, CacheMissPricePeak = 8m,
+                OutputPrice = 40m, OutputPricePeak = 40m },
 
-        // ChatGPT Plus — 月付 $20；无官方配额，按 Astra（≤272K）API 综合单价 1/20 暴力折算（无国内版，不参与地区/周期筛选）
+        // ChatGPT Plus — 月付 $20；无官方配额，按 GPT-6.2 Astra API 综合单价 1/20 暴力折算（无国内版，不参与地区/周期筛选）
         new() { Id = "chatgpt-plus", ShortName = "ChatGPT Plus", FullName = "ChatGPT Plus 订阅",
                 Brand = "OpenAI", Tier = "Plus", Version = "—", Region = "国际版", Type = PlanType.Subscription,
-                PriceMonthly = 20m, Currency = "USD", PaygAnchorId = "gpt6-astra-payg-272k", PaygAnchorFraction = 0.05m },
+                PriceMonthly = 20m, Currency = "USD", PaygAnchorId = "gpt6-2-astra-payg", PaygAnchorFraction = 0.05m },
 
         // MiniMax Token Plan — 国内 CNY，月付；官方标称月配额 Plus 6亿 / Max 18亿 / Ultra 71亿，实测约 3 倍，按实测计算
         new() { Id = "mm-plus", ShortName = "MiniMax Plus", FullName = "MiniMax Token Plan Plus",
