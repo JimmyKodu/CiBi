@@ -261,10 +261,8 @@ public sealed class MainViewModel : ViewModelBase
     // 按量付费按上下文分档的品牌（GPT-6 Astra）默认仅勾一档，避免占两个排名位；MiniMax 按量付费仅 M3.1-Flash 一档
     private readonly HashSet<string> _selTiers = new() { "GLM:Max", "Qwen:Pro", "Kimi:Allegretto", "MiniMax:Max", "MiniMax:M3.1-Flash", "OpenAI:Astra ≤272K", "OpenAI:Astra >272K", "OpenAI:Plus" };
     private readonly HashSet<string> _selCycles = new() { "年付" };
-    // 按量付费且按上下文分档定价的品牌：各档参与档次筛选（其余品牌按量付费不受档次/地区/周期筛选）
+    // 按量付费且按上下文分档定价的品牌：各档参与档次筛选（其余品牌按量付费不受档次/周期筛选）
     private static readonly HashSet<string> TieredPaygBrands = new() { "MiniMax", "OpenAI" };
-    // 地区筛选（只作用于订阅制；按量付费不参与，GPT-6 为 USD 计价）
-    private readonly HashSet<string> _selRegions = new() { "国内版" };
 
     private static bool Has(HashSet<string> s, string k) => s.Contains(k);
     private bool Toggle(HashSet<string> s, string k, bool v, string propName)
@@ -302,8 +300,6 @@ public sealed class MainViewModel : ViewModelBase
     public bool FilterYear { get => Has(_selCycles, "年付"); set => Toggle(_selCycles, "年付", value, nameof(FilterYear)); }
     public bool FilterQuarter { get => Has(_selCycles, "季付"); set => Toggle(_selCycles, "季付", value, nameof(FilterQuarter)); }
     public bool FilterMonth { get => Has(_selCycles, "月付"); set => Toggle(_selCycles, "月付", value, nameof(FilterMonth)); }
-    public bool FilterIntl { get => Has(_selRegions, "国际版"); set => Toggle(_selRegions, "国际版", value, nameof(FilterIntl)); }
-    public bool FilterCn { get => Has(_selRegions, "国内版"); set => Toggle(_selRegions, "国内版", value, nameof(FilterCn)); }
 
     private bool IsVisible(AiPlan p) =>
         _selBrands.Contains(p.Brand) &&
@@ -311,8 +307,6 @@ public sealed class MainViewModel : ViewModelBase
         (p.Type == PlanType.PayAsYouGo
             ? (!TieredPaygBrands.Contains(p.Brand) || _selTiers.Contains(p.Brand + ":" + p.Tier))
             : (_selTiers.Contains(p.Brand + ":" + p.Tier) && (p.Brand != "GLM" || _selVersions.Contains(p.Version)))) &&
-        // OpenAI 订阅无国内版，不参与地区筛选
-        (p.Type == PlanType.PayAsYouGo || p.Brand == "OpenAI" || _selRegions.Contains(p.Region)) &&
         (string.IsNullOrEmpty(p.BillingCycle) || _selCycles.Contains(p.BillingCycle));
 
     public string ExchangeHint => DisplayCurrency == "CNY"

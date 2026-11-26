@@ -8,7 +8,7 @@ public sealed class AiPlan
 {
     public required string Id { get; init; }
     public required string ShortName { get; init; }   // e.g. "Max 国际 V3"
-    public required string FullName { get; init; }    // e.g. "GLM Coding Plan Max 国际版 V3"
+    public required string FullName { get; init; }    // e.g. "GLM Coding Plan Max 国内版 V3"
     public required string Brand { get; init; }       // GLM / DeepSeek / Qwen / Kimi / MiniMax
     public required string Tier { get; init; }        // Lite / Pro / Max / Flash
     public required string Version { get; init; }     // V3 / V4 / V4.1 / 5.3 …
@@ -55,26 +55,6 @@ public sealed class AiPlan
 
     public static readonly IReadOnlyList<AiPlan> All =
     [
-        // V3 国际版 — GLM-5.4 约 1.45 亿 / 周；GLM-5.3-Flash 限时双倍约 5.84 亿 / 周（常态 2.92 亿）；年付订阅（价格已折算为月费）；高峰（工作日 14-18）消耗 ×2 计入配额
-        new() { Id = "v3-lite-int", ShortName = "Lite 国际 V3 年付 · 5.4", FullName = "GLM Coding Plan Lite 国际版 V3 年付 · GLM-5.4",
-                Brand = "GLM", Tier = "Lite", Version = "V3", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "年付",
-                PriceMonthly = 12.6m, Currency = "USD", WeeklyTokensMillions = 145m, TokenMultiplier = 1 },
-        new() { Id = "v3-lite-int-flash", ShortName = "Lite 国际 V3 年付 · Flash", FullName = "GLM Coding Plan Lite 国际版 V3 年付 · GLM-5.3-Flash",
-                Brand = "GLM", Tier = "Lite", Version = "V3", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "年付",
-                PriceMonthly = 12.6m, Currency = "USD", WeeklyTokensMillions = 584m, TokenMultiplier = 1 },
-        new() { Id = "v3-pro-int", ShortName = "Pro 国际 V3 年付 · 5.4", FullName = "GLM Coding Plan Pro 国际版 V3 年付 · GLM-5.4",
-                Brand = "GLM", Tier = "Pro", Version = "V3", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "年付",
-                PriceMonthly = 56m, Currency = "USD", WeeklyTokensMillions = 145m * 6, TokenMultiplier = 6 },
-        new() { Id = "v3-pro-int-flash", ShortName = "Pro 国际 V3 年付 · Flash", FullName = "GLM Coding Plan Pro 国际版 V3 年付 · GLM-5.3-Flash",
-                Brand = "GLM", Tier = "Pro", Version = "V3", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "年付",
-                PriceMonthly = 56m, Currency = "USD", WeeklyTokensMillions = 584m * 6, TokenMultiplier = 6 },
-        new() { Id = "v3-max-int", ShortName = "Max 国际 V3 年付 · 5.4", FullName = "GLM Coding Plan Max 国际版 V3 年付 · GLM-5.4",
-                Brand = "GLM", Tier = "Max", Version = "V3", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "年付",
-                PriceMonthly = 117.6m, Currency = "USD", WeeklyTokensMillions = 145m * 14, TokenMultiplier = 14 },
-        new() { Id = "v3-max-int-flash", ShortName = "Max 国际 V3 年付 · Flash", FullName = "GLM Coding Plan Max 国际版 V3 年付 · GLM-5.3-Flash",
-                Brand = "GLM", Tier = "Max", Version = "V3", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "年付",
-                PriceMonthly = 117.6m, Currency = "USD", WeeklyTokensMillions = 584m * 14, TokenMultiplier = 14 },
-
         // V3 国内版 — GLM-5.4 约 1.45 亿 / 周；GLM-5.3-Flash 限时双倍约 5.84 亿 / 周（常态 2.92 亿）；年付=七折 季付=八折 月付=原价；高峰（工作日 14-18）消耗 ×2 计入配额
         new() { Id = "v3-lite-cn-year", ShortName = "Lite 国内 V3 年付 · 5.4", FullName = "GLM Coding Plan Lite 国内版 V3 年付 · GLM-5.4",
                 Brand = "GLM", Tier = "Lite", Version = "V3", Region = "国内版", Type = PlanType.Subscription, BillingCycle = "年付",
@@ -227,42 +207,24 @@ public sealed class AiPlan
                 Brand = "MiniMax", Tier = "Ultra", Version = "—", Region = "国内版", Type = PlanType.Subscription,
                 PriceMonthly = 469m, Currency = "CNY", MonthlyQuotaMillions = 21300m },
 
-        // Kimi For Coding 月付订阅 — 国际 USD / 国内 CNY，每周额度官方给定（Moderato 48M/周；Allegretto / Allegro 为其 5 / 15 倍）
-        new() { Id = "kimi-moderato-int", ShortName = "Moderato 国际", FullName = "Kimi For Coding Moderato 国际版 月付",
-                Brand = "Kimi", Tier = "Moderato", Version = "—", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "月付",
-                PriceMonthly = 19m, Currency = "USD", WeeklyTokensMillions = 48m, TokenMultiplier = 1 },
+        // Kimi For Coding 月付订阅 — 国内 CNY，每周额度官方给定（Moderato 48M/周；Allegretto / Allegro 为其 5 / 15 倍）
         new() { Id = "kimi-moderato-cn", ShortName = "Moderato 国内", FullName = "Kimi For Coding Moderato 国内版 月付",
                 Brand = "Kimi", Tier = "Moderato", Version = "—", Region = "国内版", Type = PlanType.Subscription, BillingCycle = "月付",
                 PriceMonthly = 99m, Currency = "CNY", WeeklyTokensMillions = 48m, TokenMultiplier = 1 },
-        new() { Id = "kimi-allegretto-int", ShortName = "Allegretto 国际", FullName = "Kimi For Coding Allegretto 国际版 月付",
-                Brand = "Kimi", Tier = "Allegretto", Version = "—", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "月付",
-                PriceMonthly = 39m, Currency = "USD", WeeklyTokensMillions = 48m * 5, TokenMultiplier = 5 },
         new() { Id = "kimi-allegretto-cn", ShortName = "Allegretto 国内", FullName = "Kimi For Coding Allegretto 国内版 月付",
                 Brand = "Kimi", Tier = "Allegretto", Version = "—", Region = "国内版", Type = PlanType.Subscription, BillingCycle = "月付",
                 PriceMonthly = 199m, Currency = "CNY", WeeklyTokensMillions = 48m * 5, TokenMultiplier = 5 },
-        new() { Id = "kimi-allegro-int", ShortName = "Allegro 国际", FullName = "Kimi For Coding Allegro 国际版 月付",
-                Brand = "Kimi", Tier = "Allegro", Version = "—", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "月付",
-                PriceMonthly = 99m, Currency = "USD", WeeklyTokensMillions = 48m * 15, TokenMultiplier = 15 },
         new() { Id = "kimi-allegro-cn", ShortName = "Allegro 国内", FullName = "Kimi For Coding Allegro 国内版 月付",
                 Brand = "Kimi", Tier = "Allegro", Version = "—", Region = "国内版", Type = PlanType.Subscription, BillingCycle = "月付",
                 PriceMonthly = 699m, Currency = "CNY", WeeklyTokensMillions = 48m * 15, TokenMultiplier = 15 },
 
         // Kimi 年付 — 价格已折算为月费（国内 948/1908/6708 元每年 ÷ 12 = 79/159/559，约八折）
-        new() { Id = "kimi-moderato-int-year", ShortName = "Moderato 国际 年付", FullName = "Kimi For Coding Moderato 国际版 年付",
-                Brand = "Kimi", Tier = "Moderato", Version = "—", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "年付",
-                PriceMonthly = 15m, Currency = "USD", WeeklyTokensMillions = 48m, TokenMultiplier = 1 },
         new() { Id = "kimi-moderato-cn-year", ShortName = "Moderato 国内 年付", FullName = "Kimi For Coding Moderato 国内版 年付",
                 Brand = "Kimi", Tier = "Moderato", Version = "—", Region = "国内版", Type = PlanType.Subscription, BillingCycle = "年付",
                 PriceMonthly = 79m, Currency = "CNY", WeeklyTokensMillions = 48m, TokenMultiplier = 1 },
-        new() { Id = "kimi-allegretto-int-year", ShortName = "Allegretto 国际 年付", FullName = "Kimi For Coding Allegretto 国际版 年付",
-                Brand = "Kimi", Tier = "Allegretto", Version = "—", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "年付",
-                PriceMonthly = 31m, Currency = "USD", WeeklyTokensMillions = 48m * 5, TokenMultiplier = 5 },
         new() { Id = "kimi-allegretto-cn-year", ShortName = "Allegretto 国内 年付", FullName = "Kimi For Coding Allegretto 国内版 年付",
                 Brand = "Kimi", Tier = "Allegretto", Version = "—", Region = "国内版", Type = PlanType.Subscription, BillingCycle = "年付",
                 PriceMonthly = 159m, Currency = "CNY", WeeklyTokensMillions = 48m * 5, TokenMultiplier = 5 },
-        new() { Id = "kimi-allegro-int-year", ShortName = "Allegro 国际 年付", FullName = "Kimi For Coding Allegro 国际版 年付",
-                Brand = "Kimi", Tier = "Allegro", Version = "—", Region = "国际版", Type = PlanType.Subscription, BillingCycle = "年付",
-                PriceMonthly = 79m, Currency = "USD", WeeklyTokensMillions = 48m * 15, TokenMultiplier = 15 },
         new() { Id = "kimi-allegro-cn-year", ShortName = "Allegro 国内 年付", FullName = "Kimi For Coding Allegro 国内版 年付",
                 Brand = "Kimi", Tier = "Allegro", Version = "—", Region = "国内版", Type = PlanType.Subscription, BillingCycle = "年付",
                 PriceMonthly = 559m, Currency = "CNY", WeeklyTokensMillions = 48m * 15, TokenMultiplier = 15 },
