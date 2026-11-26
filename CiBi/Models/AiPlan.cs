@@ -171,6 +171,13 @@ public sealed class AiPlan
                 CacheHitPrice = 0.5m, CacheHitPricePeak = 0.5m,
                 CacheMissPrice = 10m, CacheMissPricePeak = 10m,
                 OutputPrice = 30m, OutputPricePeak = 30m },
+        // Kimi K3.1 Pro 按量付费（输入 ¥13 / 输出 ¥68 / 缓存命中 ¥1.3，每 1M token；缓存写入价与输入同价，无需另建字段），不分时段
+        // 高速版 K3.1 Pro Highspeed 价格与标准版一致，按约定不收录
+        new() { Id = "kimi-k31-pro-payg", ShortName = "Kimi K3.1 Pro", FullName = "Kimi K3.1 Pro 按量付费",
+                Brand = "Kimi", Tier = "Kimi", Version = "K3.1", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "CNY",
+                CacheHitPrice = 1.3m, CacheHitPricePeak = 1.3m,
+                CacheMissPrice = 13m, CacheMissPricePeak = 13m,
+                OutputPrice = 68m, OutputPricePeak = 68m },
         new() { Id = "kimi-k3-payg", ShortName = "Kimi K3", FullName = "Kimi K3 按量付费",
                 Brand = "Kimi", Tier = "Kimi", Version = "K3", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "CNY",
                 CacheHitPrice = 2m, CacheHitPricePeak = 2m,
