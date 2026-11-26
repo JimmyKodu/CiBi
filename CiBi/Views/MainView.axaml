@@ -132,10 +132,6 @@
                       <CheckBox Content="Max" IsChecked="{Binding FilterTierMmMax}"/>
                       <CheckBox Content="Ultra" IsChecked="{Binding FilterTierMmUltra}"/>
                     </StackPanel>
-                    <TextBlock Text="按量付费模型" FontSize="11" Foreground="#9CA3AF" Margin="0,3,0,0"/>
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                      <CheckBox Content="M3.1-Flash" IsChecked="{Binding FilterTierMmM31Flash}"/>
-                    </StackPanel>
                   </StackPanel>
                 </StackPanel>
                 <StackPanel>

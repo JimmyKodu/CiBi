@@ -184,6 +184,7 @@ public sealed class AiPlan
                 CacheMissPrice = 20m, CacheMissPricePeak = 20m,
                 OutputPrice = 100m, OutputPricePeak = 100m, ContextWindowTokens = 1_048_576 },
         // MiniMax-M3.1-Flash 按量付费 — 模型升级后的新单价（缓存命中 0.10 / 缓存未命中 1 / 输出 4，每 1M token，元），不分时段；取代原 MiniMax-M3 上下文档
+        // 按量付费不单独设档次筛选（同 GLM），随品牌复选框一并显示；Tier 仅用于卡片标题展示
         new() { Id = "mm-m31-flash-payg", ShortName = "MiniMax-M3.1-Flash", FullName = "MiniMax-M3.1-Flash 按量付费",
                 Brand = "MiniMax", Tier = "M3.1-Flash", Version = "M3.1", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "CNY",
                 CacheHitPrice = 0.10m, CacheHitPricePeak = 0.10m,
