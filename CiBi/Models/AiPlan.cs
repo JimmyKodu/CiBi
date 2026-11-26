@@ -164,17 +164,12 @@ public sealed class AiPlan
                 CacheHitPrice = 2m, CacheHitPricePeak = 2m,
                 CacheMissPrice = 20m, CacheMissPricePeak = 20m,
                 OutputPrice = 100m, OutputPricePeak = 100m, ContextWindowTokens = 1_048_576 },
-        // MiniMax-M3 按量付费 — 按上下文窗口分两档定价，永久五折（表中单价为折后实付价），不分时段；Tier 兼作筛选键（默认仅一档参与排行）
-        new() { Id = "mm-m3-payg-512k", ShortName = "MiniMax-M3 ≤512K", FullName = "MiniMax-M3 按量付费（上下文 ≤ 512K，永久五折）",
-                Brand = "MiniMax", Tier = "M3 ≤512K", Version = "M3", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "CNY",
-                CacheHitPrice = 0.42m, CacheHitPricePeak = 0.42m,
-                CacheMissPrice = 2.1m, CacheMissPricePeak = 2.1m,
-                OutputPrice = 8.4m, OutputPricePeak = 8.4m, ContextWindowTokens = 524_288 },
-        new() { Id = "mm-m3-payg-1m", ShortName = "MiniMax-M3 1M", FullName = "MiniMax-M3 按量付费（上下文 512K ~ 1M，永久五折）",
-                Brand = "MiniMax", Tier = "M3 1M", Version = "M3", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "CNY",
-                CacheHitPrice = 0.84m, CacheHitPricePeak = 0.84m,
-                CacheMissPrice = 4.2m, CacheMissPricePeak = 4.2m,
-                OutputPrice = 16.8m, OutputPricePeak = 16.8m, ContextWindowTokens = 1_048_576 },
+        // MiniMax-M3.1-Flash 按量付费 — 模型升级后的新单价（缓存命中 0.10 / 缓存未命中 1 / 输出 4，每 1M token，元），不分时段；取代原 MiniMax-M3 上下文档
+        new() { Id = "mm-m31-flash-payg", ShortName = "MiniMax-M3.1-Flash", FullName = "MiniMax-M3.1-Flash 按量付费",
+                Brand = "MiniMax", Tier = "M3.1-Flash", Version = "M3.1", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "CNY",
+                CacheHitPrice = 0.10m, CacheHitPricePeak = 0.10m,
+                CacheMissPrice = 1m, CacheMissPricePeak = 1m,
+                OutputPrice = 4m, OutputPricePeak = 4m, ContextWindowTokens = 1_048_576 },
         // GPT-6 Astra 按量付费（USD，不分时段）— 按上下文分两档：≤272K 标准档；>272K 长上下文档（输入 ×2、输出 ×1.5）；官方另收缓存写入费（=输入 ×1.25，$12.5 / $25），本表不建模
         new() { Id = "gpt6-astra-payg-272k", ShortName = "GPT-6 Astra ≤272K", FullName = "GPT-6 Astra 按量付费（上下文 ≤ 272K）",
                 Brand = "OpenAI", Tier = "Astra ≤272K", Version = "6", Region = "按量付费", Type = PlanType.PayAsYouGo, Currency = "USD",

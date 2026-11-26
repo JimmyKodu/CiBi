@@ -258,8 +258,8 @@ public sealed class MainViewModel : ViewModelBase
     private readonly HashSet<string> _selBrands = new() { "GLM", "DeepSeek", "Qwen", "Kimi", "MiniMax", "OpenAI" };
     private readonly HashSet<string> _selVersions = new() { "V3" };
     // 档次按品牌分组（键 = 品牌:档次）：GLM=Lite/Pro/Max，Qwen=Lite/Standard/Pro，MiniMax=Plus/Max/Ultra，Kimi=Moderato/Allegretto/Allegro；
-    // 按量付费按上下文分档的品牌（MiniMax-M3 / GPT-6 Astra）默认仅勾一档，避免占两个排名位
-    private readonly HashSet<string> _selTiers = new() { "GLM:Max", "Qwen:Pro", "Kimi:Allegretto", "MiniMax:Max", "MiniMax:M3 ≤512K", "OpenAI:Astra ≤272K", "OpenAI:Astra >272K", "OpenAI:Plus" };
+    // 按量付费按上下文分档的品牌（GPT-6 Astra）默认仅勾一档，避免占两个排名位；MiniMax 按量付费仅 M3.1-Flash 一档
+    private readonly HashSet<string> _selTiers = new() { "GLM:Max", "Qwen:Pro", "Kimi:Allegretto", "MiniMax:Max", "MiniMax:M3.1-Flash", "OpenAI:Astra ≤272K", "OpenAI:Astra >272K", "OpenAI:Plus" };
     private readonly HashSet<string> _selCycles = new() { "年付" };
     // 按量付费且按上下文分档定价的品牌：各档参与档次筛选（其余品牌按量付费不受档次/地区/周期筛选）
     private static readonly HashSet<string> TieredPaygBrands = new() { "MiniMax", "OpenAI" };
@@ -292,8 +292,7 @@ public sealed class MainViewModel : ViewModelBase
     public bool FilterTierMmPlus { get => Has(_selTiers, "MiniMax:Plus"); set => Toggle(_selTiers, "MiniMax:Plus", value, nameof(FilterTierMmPlus)); }
     public bool FilterTierMmMax { get => Has(_selTiers, "MiniMax:Max"); set => Toggle(_selTiers, "MiniMax:Max", value, nameof(FilterTierMmMax)); }
     public bool FilterTierMmUltra { get => Has(_selTiers, "MiniMax:Ultra"); set => Toggle(_selTiers, "MiniMax:Ultra", value, nameof(FilterTierMmUltra)); }
-    public bool FilterTierMmM3Low { get => Has(_selTiers, "MiniMax:M3 ≤512K"); set => Toggle(_selTiers, "MiniMax:M3 ≤512K", value, nameof(FilterTierMmM3Low)); }
-    public bool FilterTierMmM3High { get => Has(_selTiers, "MiniMax:M3 1M"); set => Toggle(_selTiers, "MiniMax:M3 1M", value, nameof(FilterTierMmM3High)); }
+    public bool FilterTierMmM31Flash { get => Has(_selTiers, "MiniMax:M3.1-Flash"); set => Toggle(_selTiers, "MiniMax:M3.1-Flash", value, nameof(FilterTierMmM31Flash)); }
     public bool FilterTierGptAstraLow { get => Has(_selTiers, "OpenAI:Astra ≤272K"); set => Toggle(_selTiers, "OpenAI:Astra ≤272K", value, nameof(FilterTierGptAstraLow)); }
     public bool FilterTierGptAstraHigh { get => Has(_selTiers, "OpenAI:Astra >272K"); set => Toggle(_selTiers, "OpenAI:Astra >272K", value, nameof(FilterTierGptAstraHigh)); }
     public bool FilterTierGptPlus { get => Has(_selTiers, "OpenAI:Plus"); set => Toggle(_selTiers, "OpenAI:Plus", value, nameof(FilterTierGptPlus)); }
